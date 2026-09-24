@@ -10,26 +10,38 @@
  * (POST /overlay/standings, /overlay/sector, /overlay/car-telemetry,
  * /overlay/driver-showcase) and broadcast through the WebSocket.
  */
-import { useOverlayWS } from '../hooks/useOverlayWS';
-import { OverlayStencil } from '../components/overlays/stencil';
+import { OverlayStencil } from "../components/overlays/stencil";
+import { useOverlayWS } from "../hooks/useOverlayWS";
 
 export function OverlayPage() {
   const { state, connected } = useOverlayWS();
+  console.log("🚀 ~ OverlayPage ~ connected:", connected);
 
   return (
     <div
       className="overlay-root"
-      style={{ width: 1920, height: 1080, position: 'relative', overflow: 'hidden' }}
+      style={{
+        width: 1920,
+        height: 1080,
+        position: "relative",
+        overflow: "hidden",
+      }}
     >
       {/* Minimal connection indicator — barely visible in OBS, useful for debugging */}
       {!connected && (
-        <div style={{
-          position: 'absolute', bottom: 12, left: 12,
-          fontFamily: '"JetBrains Mono", monospace',
-          fontSize: 10, fontWeight: 700, letterSpacing: 2,
-          color: 'rgba(255,255,255,0.25)',
-          pointerEvents: 'none',
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            bottom: 12,
+            left: 12,
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 2,
+            color: "rgba(255,255,255,0.25)",
+            pointerEvents: "none",
+          }}
+        >
           ● CONNECTING
         </div>
       )}

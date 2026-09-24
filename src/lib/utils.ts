@@ -1,3 +1,5 @@
+import type { RosterEntry } from '../types';
+
 /** Format lap time from milliseconds → "M:SS.mmm". Returns "—:—.—" for invalid input. */
 export function fmtLapMs(ms: number | null | undefined): string {
   if (ms == null || ms < 0) return '—:—.—';
@@ -75,3 +77,29 @@ export function fmtTimestamp(ms: number): string {
 
 /** localStorage key for the driver photo map ({ [driverId]: base64DataUrl }). */
 export const DRIVER_PHOTOS_KEY = 'gt7:driver_photos';
+
+export function loadDriverPhotos(): Record<number, string> {
+  try {
+    return JSON.parse(localStorage.getItem(DRIVER_PHOTOS_KEY) ?? '{}') as Record<number, string>;
+  } catch {
+    return {};
+  }
+}
+
+export function saveDriverPhotos(photos: Record<number, string>): void {
+  localStorage.setItem(DRIVER_PHOTOS_KEY, JSON.stringify(photos));
+}
+
+export function clearDriverPhotos(): void {
+  localStorage.removeItem(DRIVER_PHOTOS_KEY);
+}
+
+/** Build a lookup map from roster array keyed by driver ID. */
+export function createRosterLookup(roster: readonly RosterEntry[]): Record<number, RosterEntry> {
+  return Object.fromEntries(roster.map((d) => [d.id, d]));
+}
+
+/** Get 1-indexed position of a driver in the current race order. */
+export function getDriverPosition(order: readonly number[], driverId: number): number {
+  return order.indexOf(driverId) + 1;
+}

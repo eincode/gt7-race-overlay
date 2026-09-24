@@ -1,48 +1,42 @@
-import { useEffect, useRef, useState } from "react";
+import { createRosterLookup, fmtTrackName } from "../../../lib/utils";
 import type { OverlayData } from "../../../types";
-import { fmtLapMs, fmtTrackName } from "../../../lib/utils";
-import { ST, stripes, clip } from "./tokens";
+import { Badge } from "./Badge";
+import { formatLap } from "./qualifying/result";
+import { clip, FONT, panelMotion, ST, stripes } from "./tokens";
 
 interface Props {
   state: OverlayData;
+  isVisible: boolean;
 }
 
-const MODE_LABELS: Record<string, string> = {
-  race: "RACE",
-  qualifying: "QUALIFYING",
-  practice: "PRACTICE",
-};
+export function STStandings({ state, isVisible }: Props) {
+  const { roster, raceState } = state;
+  const { mode, lap, totalLaps, trackId } = raceState;
 
-const GAP_THROTTLE_MS = 1000;
-
-export function STStandings({ state }: Props) {
-  const { roster, raceState, drivers, focusedId } = state;
-  const { mode, lap, totalLaps, order, trackId } = raceState;
-
-  const rosterById = Object.fromEntries(roster.map((d) => [d.id, d]));
+  const rosterById = createRosterLookup(roster);
   const trackName = fmtTrackName(trackId);
   const isRace = mode === "race";
-  const modeLabel = MODE_LABELS[mode] ?? mode.toUpperCase();
+  // const modeLabel = mode.toUpperCase();
 
-  // ── Throttled gap snapshot (race mode only) ─────────────────────────────
-  const lastGapUpdateRef = useRef(0);
-  const [gapSnapshot, setGapSnapshot] = useState<Record<number, number>>({});
+  // // ── Throttled gap snapshot (race mode only) ─────────────────────────────
+  // const lastGapUpdateRef = useRef(0);
+  // const [gapSnapshot, setGapSnapshot] = useState<Record<number, number>>({});
 
-  useEffect(() => {
-    if (!isRace) {
-      // Reset so switching back to race shows fresh values immediately
-      lastGapUpdateRef.current = 0;
-      return;
-    }
-    const now = Date.now();
-    if (now - lastGapUpdateRef.current < GAP_THROTTLE_MS) return;
-    lastGapUpdateRef.current = now;
-    setGapSnapshot(
-      Object.fromEntries(
-        order.map((id) => [id, drivers[id]?.derived?.gapToAhead ?? 0]),
-      ),
-    );
-  }, [isRace, drivers, order]);
+  // useEffect(() => {
+  //   if (!isRace) {
+  //     // Reset so switching back to race shows fresh values immediately
+  //     lastGapUpdateRef.current = 0;
+  //     return;
+  //   }
+  //   const now = Date.now();
+  //   if (now - lastGapUpdateRef.current < GAP_THROTTLE_MS) return;
+  //   lastGapUpdateRef.current = now;
+  //   setGapSnapshot(
+  //     Object.fromEntries(
+  //       order.map((id) => [id, drivers[id]?.derived?.gapToAhead ?? 0]),
+  //     ),
+  //   );
+  // }, [isRace, drivers, order]);
 
   return (
     <div
@@ -51,8 +45,9 @@ export function STStandings({ state }: Props) {
         left: 28,
         top: 28,
         width: 400,
-        fontFamily: '"Barlow Condensed", system-ui, sans-serif',
+        fontFamily: FONT.body,
         color: ST.ink,
+        ...panelMotion(isVisible, "left"),
       }}
     >
       {/* Header */}
@@ -86,7 +81,7 @@ export function STStandings({ state }: Props) {
           <div>
             <div
               style={{
-                fontFamily: "Oswald, sans-serif",
+                fontFamily: FONT.title,
                 fontSize: 36,
                 fontWeight: 700,
                 letterSpacing: 1.4,
@@ -94,8 +89,10 @@ export function STStandings({ state }: Props) {
                 fontVariantNumeric: "tabular-nums",
               }}
             >
-              LAP {String(lap).padStart(2, "0")}
-              {totalLaps > 0 && (
+              {mode === "race"
+                ? `LAP ${String(lap).padStart(2, "0")}`
+                : mode.toLocaleUpperCase()}
+              {mode === "race" && totalLaps > 0 && (
                 <span
                   style={{
                     color: ST.inkVeryDim,
@@ -118,61 +115,31 @@ export function STStandings({ state }: Props) {
                 fontWeight: 600,
               }}
             >
-              {modeLabel} · {trackName}
+              {trackName}
             </div>
           </div>
-          <div
-            style={{
-              background: ST.accent,
-              color: "#fff",
-              fontFamily: "Oswald, sans-serif",
-              fontSize: 13,
-              fontWeight: 700,
-              letterSpacing: 2,
-              padding: "4px 10px",
-              clipPath: clip.gearSlash,
-            }}
-          >
-            LIVE
-          </div>
+          <Badge letterSpacing={2}>LIVE</Badge>
         </div>
       </div>
 
       {/* Driver rows */}
       <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {order.map((id, idx) => {
-          const d = rosterById[id];
-          if (!d) return null;
-
-          const dv = drivers[id]?.derived;
-          const tel = drivers[id]?.telemetry;
-          const isLeader = idx === 0;
-          const isFocused = id === focusedId;
-
-          // Gap: use 1-second throttled snapshot; fall back to live value before first snapshot
-          const gap = gapSnapshot[id] ?? dv?.gapToAhead ?? 0;
-
-          // Right column — race: gap/PIT/P1; qualifying/practice: best lap time
-          const rightText = isRace
-            ? isLeader
-              ? "P1"
-              : dv?.pitted
-                ? "PIT"
-                : `+${gap.toFixed(3)}`
-            : tel?.bestLaptime
-              ? fmtLapMs(tel.bestLaptime)
-              : "—";
+        {state.standingsV2.map((d, idx) => {
+          const id = d.driverId;
+          const isLeader = d.position === 1;
+          const isFocused = false;
+          const { country, name } = rosterById[Number(id)];
 
           const rightColor = isRace
             ? isLeader
               ? ST.leader
-              : dv?.pitted
-                ? ST.fastest
-                : ST.inkDim
-            : isLeader
-              ? ST.leader
-              : ST.inkDim;
+              : ST.inkDim
+            : ST.inkDim;
 
+          const bestLap = formatLap(
+            (state.drivers[Number(id)].telemetry?.bestLaptime ?? 0) / 1000,
+          );
+          const rightText = mode === "race" ? d.gapText : bestLap;
           return (
             <div
               key={id}
@@ -197,7 +164,7 @@ export function STStandings({ state }: Props) {
                       ? ST.accent
                       : "#000",
                   color: isLeader || isFocused ? "#0a0a0d" : ST.ink,
-                  fontFamily: "Oswald, sans-serif",
+                  fontFamily: FONT.title,
                   fontSize: 26,
                   fontWeight: 700,
                   letterSpacing: 0,
@@ -215,14 +182,14 @@ export function STStandings({ state }: Props) {
               <div
                 style={{
                   fontSize: 11,
-                  fontFamily: '"JetBrains Mono", monospace',
+                  fontFamily: FONT.mono,
                   fontWeight: 700,
                   letterSpacing: 1,
                   color: ST.inkDim,
                   textAlign: "center",
                 }}
               >
-                {d.country}
+                {country}
               </div>
 
               {/* Name */}
@@ -236,7 +203,7 @@ export function STStandings({ state }: Props) {
               >
                 <div
                   style={{
-                    fontFamily: "Oswald, sans-serif",
+                    fontFamily: FONT.title,
                     fontSize: 16,
                     fontWeight: 600,
                     letterSpacing: 0.6,
@@ -246,7 +213,7 @@ export function STStandings({ state }: Props) {
                     lineHeight: 1,
                   }}
                 >
-                  {d.name}
+                  {name}
                 </div>
               </div>
 
@@ -254,7 +221,7 @@ export function STStandings({ state }: Props) {
               <div
                 style={{
                   textAlign: "right",
-                  fontFamily: "Oswald, sans-serif",
+                  fontFamily: FONT.title,
                   fontVariantNumeric: "tabular-nums",
                   fontSize: 16,
                   fontWeight: 600,

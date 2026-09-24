@@ -1,10 +1,10 @@
-export type SessionStatus = 'waiting' | 'racing' | 'finished';
-export type SessionMode   = 'race' | 'qualifying' | 'practice';
-export type SectorStatus  = 'purple' | 'green' | 'red' | 'neutral';
+export type SessionStatus = "waiting" | "racing" | "finished";
+export type SessionMode = "race" | "qualifying" | "practice";
+export type SectorStatus = "purple" | "green" | "red" | "neutral";
 
 export interface RosterEntry {
-  id:      number;
-  name:    string;
+  id: number;
+  name: string;
   country: string;
 }
 
@@ -19,10 +19,11 @@ export interface Session {
 // ── Overlay panel visibility (server-driven) ────────────────────────────────
 
 export interface OverlayState {
-  standings:      { visible: boolean };
-  sector:         { visible: boolean; driverIds: number[] };  // 0–2 IDs
-  carTelemetry:   { visible: boolean; driverIds: number[] };  // 0–2 IDs
+  standings: { visible: boolean };
+  sector: { visible: boolean; driverIds: number[] }; // 0–2 IDs
+  carTelemetry: { visible: boolean; driverIds: number[] }; // 0–2 IDs
   driverShowcase: { visible: boolean; driverId: number | null };
+  driverTelemetry: { visible: boolean; driverId: number | null };
 }
 
 export interface DriverTelemetry {
@@ -48,6 +49,7 @@ export interface DriverTelemetry {
   currentLap: number;
   RaceStartPosition: number;
   position: [number, number, number];
+  steeringAngle?: number;
 }
 
 export interface DerivedData {
@@ -58,6 +60,8 @@ export interface DerivedData {
   pitted: boolean;
   /** 0-indexed sector the driver is currently in; resets to 0 at each new lap. */
   currentSector: number;
+  /** Lap-relative ms when the current sector began (server-tracked). */
+  sectorStartLapT: number;
   /** ms times from the last completed lap; 0 = not yet completed this lap. Length = sectorCount. */
   sectors: number[];
   sectorStatus: SectorStatus[];
@@ -86,16 +90,26 @@ export interface RaceState {
 // ── WebSocket message shapes ────────────────────────────────────────────────
 
 export interface RosterBroadcast {
-  type: 'roster';
-  session: Pick<Session, 'id' | 'status' | 'mode' | 'createdAt'>;
+  type: "roster";
+  session: Pick<Session, "id" | "status" | "mode" | "createdAt">;
   roster: RosterEntry[];
 }
 
 export interface StateBroadcast {
-  type: 'state';
+  type: "state";
   raceState: RaceState;
   drivers: Record<number, DriverState>;
   overlayState: OverlayState;
+  standingsV2: StandingsRow[];
+}
+
+export interface StandingsRow {
+  driverId: string;
+  position: number;
+  gapText: string;
+  gapSeconds: number | null;
+  gapMetres: number | null;
+  totalTime: number | null;
 }
 
 export type WSMessage = RosterBroadcast | StateBroadcast;
@@ -104,12 +118,13 @@ export type WSMessage = RosterBroadcast | StateBroadcast;
 
 /** Aggregated live data passed to all overlay components. */
 export interface OverlayData {
-  session: Pick<Session, 'id' | 'status' | 'mode' | 'createdAt'> | null;
+  session: Pick<Session, "id" | "status" | "mode" | "createdAt"> | null;
   roster: RosterEntry[];
   raceState: RaceState;
   drivers: Record<number, DriverState>;
   focusedId: number | null;
   overlayState: OverlayState;
+  standingsV2: StandingsRow[];
 }
 
 // ── REST response shapes ────────────────────────────────────────────────────
@@ -133,6 +148,15 @@ export interface DriversListResponse {
     connected: boolean;
     lastSeen: number;
   }>;
+}
+
+export interface Track {
+  id: string;
+  name: string;
+  country: string;
+  totalLength: number;
+  totalSectors: number;
+  imagePath: string;
 }
 
 export interface ApiError {

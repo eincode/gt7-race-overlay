@@ -5,12 +5,12 @@
  * To add another overlay direction, create a sibling folder and export a
  * component with the same `OverlayProps` signature.
  */
-import type { OverlayData } from '../../../types';
-import { STStandings } from './STStandings';
-import { STSectorCompare } from './STSectorCompare';
-import { STCurrentSector } from './STCurrentSector';
-import { STCarCompare } from './STCarCompare';
-import { STShowcase } from './STShowcase';
+import type { OverlayData } from "../../../types";
+import { STCarCompare } from "./STCarCompare";
+import { STCurrentSector } from "./STCurrentSector";
+import { STDriverTelemetry } from "./STDriverTelemetry";
+import { STShowcase } from "./STShowcase";
+import { STStandings } from "./STStandings";
 
 export interface OverlayProps {
   state: OverlayData;
@@ -20,11 +20,21 @@ export function OverlayStencil({ state }: OverlayProps) {
   const { overlayState } = state;
   return (
     <>
-      {overlayState.standings.visible      && <STStandings state={state} />}
+      <STStandings state={state} isVisible={overlayState.standings.visible} />
       {/* {overlayState.sector.visible         && <STSectorCompare state={state} />} */}
-      {overlayState.sector.visible         && <STCurrentSector state={state} />}
-      {overlayState.carTelemetry.visible   && <STCarCompare state={state} />}
-      {overlayState.driverShowcase.visible && <STShowcase state={state} />}
+      <STCurrentSector state={state} isVisible={overlayState.sector.visible} />
+      <STCarCompare
+        state={state}
+        isVisible={overlayState.carTelemetry.visible}
+      />
+      <STShowcase
+        state={state}
+        isVisible={overlayState.driverShowcase.visible}
+      />
+      <STDriverTelemetry
+        state={state}
+        isVisible={overlayState.driverTelemetry.visible}
+      />
     </>
   );
 }

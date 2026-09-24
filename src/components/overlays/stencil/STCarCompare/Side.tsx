@@ -1,17 +1,14 @@
-import type { OverlayData, DriverTelemetry, RosterEntry } from "../../../types";
-import {
-  msToKmh,
-  bytePct,
-  tireTempColor,
-  categoryInfo,
-} from "../../../lib/utils";
-import { ST, clip } from "./tokens";
+import { useGearInfo } from "../../../../hooks/useGearInfo";
+import { useRPMInfo } from "../../../../hooks/useRPMInfo";
+import { CAR_LIST } from "../../../../lib/carList";
+import { bytePct, categoryInfo, msToKmh } from "../../../../lib/utils";
+import type { DriverTelemetry, RosterEntry } from "../../../../types";
+import { Badge } from "../Badge";
+import { FONT, ST, clip } from "../tokens";
+import { InputBar } from "./InputBar";
+import { TireTemp } from "./TireTemp";
 
 interface Props {
-  state: OverlayData;
-}
-
-interface SideProps {
   d: RosterEntry;
   tel: DriverTelemetry;
   mirror: boolean;
@@ -19,140 +16,13 @@ interface SideProps {
 
 const TYRE_POSITIONS = ["FL", "FR", "RL", "RR"] as const;
 
-function TireTemp({ value, pos }: { value: number; pos: string }) {
-  return (
-    <div
-      style={{
-        background: "rgba(255,255,255,0.04)",
-        border: `1px solid ${ST.border}`,
-        padding: "6px 8px",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 2,
-      }}
-    >
-      <div
-        style={{
-          fontFamily: '"JetBrains Mono", monospace',
-          fontSize: 9,
-          fontWeight: 700,
-          letterSpacing: 1.4,
-          color: ST.inkVeryDim,
-        }}
-      >
-        {pos}
-      </div>
-      <div
-        style={{
-          fontFamily: "Oswald, sans-serif",
-          fontSize: 18,
-          fontWeight: 700,
-          fontVariantNumeric: "tabular-nums",
-          lineHeight: 1,
-          color: tireTempColor(value),
-        }}
-      >
-        {Math.round(value)}
-        <span
-          style={{
-            fontSize: 9,
-            color: ST.inkVeryDim,
-            fontWeight: 500,
-            marginLeft: 2,
-          }}
-        >
-          °
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function InputBar({
-  label,
-  val,
-  color,
-  mirror,
-}: {
-  label: string;
-  val: number;
-  color: string;
-  mirror: boolean;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        flexDirection: mirror ? "row-reverse" : "row",
-      }}
-    >
-      <span
-        style={{
-          fontFamily: '"JetBrains Mono", monospace',
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: 1.6,
-          color: ST.inkVeryDim,
-          width: 26,
-          textAlign: mirror ? "right" : "left",
-        }}
-      >
-        {label}
-      </span>
-      <div
-        style={{
-          flex: 1,
-          position: "relative",
-          height: 12,
-          background: "rgba(255,255,255,0.04)",
-          clipPath: mirror
-            ? "polygon(6px 0, 100% 0, 100% 100%, 0 100%)"
-            : "polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%)",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            [mirror ? "right" : "left"]: 0,
-            width: `${val}%`,
-            background: color,
-            transition: "width 0.12s linear",
-          }}
-        />
-      </div>
-      <span
-        style={{
-          fontFamily: "Oswald, sans-serif",
-          fontSize: 14,
-          fontWeight: 700,
-          fontVariantNumeric: "tabular-nums",
-          color: ST.ink,
-          width: 36,
-          textAlign: mirror ? "left" : "right",
-        }}
-      >
-        {val}%
-      </span>
-    </div>
-  );
-}
-
-function Side({ d, tel, mirror }: SideProps) {
+export function Side({ d, tel, mirror }: Props) {
   const cat = categoryInfo(tel.carCategory);
   const speedKmh = Math.round(msToKmh(tel.speed));
-  const curG = tel.currentGear;
-  const sugG = tel.suggestedGear;
-  const shouldShift = sugG > curG && tel.EngineRPM > tel.minAlertRPM;
+  const { curGear, shouldShift, suggestedGear } = useGearInfo(tel);
   const throttlePct = bytePct(tel.throttle);
   const brakePct = bytePct(tel.brake);
-  const rpmPct = Math.min(100, (tel.EngineRPM / tel.maxAlertRPM) * 100);
-  const minAlertPct = (tel.minAlertRPM / tel.maxAlertRPM) * 100;
-  const inAlert = tel.EngineRPM >= tel.minAlertRPM;
+  const { rpmPctOfMax: rpmPct, minAlertPct, inAlert } = useRPMInfo(tel);
 
   return (
     <div
@@ -178,7 +48,7 @@ function Side({ d, tel, mirror }: SideProps) {
         >
           <span
             style={{
-              fontFamily: '"JetBrains Mono", monospace',
+              fontFamily: FONT.mono,
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: 1.5,
@@ -189,7 +59,7 @@ function Side({ d, tel, mirror }: SideProps) {
           </span>
           <span
             style={{
-              fontFamily: "Oswald, sans-serif",
+              fontFamily: FONT.title,
               fontSize: 22,
               fontWeight: 700,
               letterSpacing: 1,
@@ -198,24 +68,20 @@ function Side({ d, tel, mirror }: SideProps) {
           >
             {d.name}
           </span>
-          <span
-            style={{
-              background: cat.color,
-              color: cat.text,
-              padding: "2px 8px",
-              fontFamily: "Oswald, sans-serif",
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: 1.4,
-              clipPath: clip.smallSlash,
-            }}
+          <Badge
+            background={cat.color}
+            color={cat.text}
+            fontSize={12}
+            letterSpacing={1.4}
+            padding="2px 8px"
+            clipType={clip.smallSlash}
           >
             {tel.carCategory}
-          </span>
+          </Badge>
         </div>
         <div
           style={{
-            fontFamily: '"JetBrains Mono", monospace',
+            fontFamily: FONT.mono,
             fontSize: 10,
             color: ST.inkVeryDim,
             letterSpacing: 1.4,
@@ -223,7 +89,7 @@ function Side({ d, tel, mirror }: SideProps) {
             fontWeight: 500,
           }}
         >
-          CODE #{tel.carCode}
+          {CAR_LIST.find((car) => car.id === tel.carCode)?.name}
         </div>
       </div>
 
@@ -251,7 +117,7 @@ function Side({ d, tel, mirror }: SideProps) {
         >
           <span
             style={{
-              fontFamily: "Oswald, sans-serif",
+              fontFamily: FONT.title,
               fontSize: 64,
               fontWeight: 700,
               lineHeight: 1,
@@ -259,7 +125,7 @@ function Side({ d, tel, mirror }: SideProps) {
               letterSpacing: 0,
             }}
           >
-            {curG === 0 ? "N" : curG}
+            {curGear}
           </span>
           {shouldShift && (
             <span
@@ -267,14 +133,14 @@ function Side({ d, tel, mirror }: SideProps) {
                 position: "absolute",
                 top: 4,
                 [mirror ? "left" : "right"]: 6,
-                fontFamily: "Oswald, sans-serif",
+                fontFamily: FONT.title,
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: 1.4,
                 animation: "stShiftPulse 0.6s ease-in-out infinite",
               }}
             >
-              ▲{sugG}
+              ▲{suggestedGear}
             </span>
           )}
         </div>
@@ -291,7 +157,7 @@ function Side({ d, tel, mirror }: SideProps) {
         >
           <div
             style={{
-              fontFamily: '"JetBrains Mono", monospace',
+              fontFamily: FONT.mono,
               fontSize: 9.5,
               fontWeight: 700,
               letterSpacing: 1.8,
@@ -303,7 +169,7 @@ function Side({ d, tel, mirror }: SideProps) {
           <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
             <span
               style={{
-                fontFamily: "Oswald, sans-serif",
+                fontFamily: FONT.title,
                 fontSize: 42,
                 fontWeight: 700,
                 lineHeight: 0.9,
@@ -333,7 +199,7 @@ function Side({ d, tel, mirror }: SideProps) {
           style={{
             display: "flex",
             justifyContent: "space-between",
-            fontFamily: '"JetBrains Mono", monospace',
+            fontFamily: FONT.mono,
             fontSize: 9.5,
             fontWeight: 700,
             letterSpacing: 1.6,
@@ -343,7 +209,7 @@ function Side({ d, tel, mirror }: SideProps) {
           <span>RPM</span>
           <span
             style={{
-              fontFamily: "Oswald, sans-serif",
+              fontFamily: FONT.title,
               fontSize: 13,
               fontWeight: 700,
               fontVariantNumeric: "tabular-nums",
@@ -420,7 +286,7 @@ function Side({ d, tel, mirror }: SideProps) {
         <div style={{ flex: 1.1 }}>
           <div
             style={{
-              fontFamily: '"JetBrains Mono", monospace',
+              fontFamily: FONT.mono,
               fontSize: 9.5,
               fontWeight: 700,
               letterSpacing: 1.6,
@@ -431,7 +297,7 @@ function Side({ d, tel, mirror }: SideProps) {
           </div>
           <div
             style={{
-              fontFamily: "Oswald, sans-serif",
+              fontFamily: FONT.title,
               fontSize: 26,
               fontWeight: 700,
               lineHeight: 1,
@@ -481,7 +347,7 @@ function Side({ d, tel, mirror }: SideProps) {
         <div style={{ flex: 1.4 }}>
           <div
             style={{
-              fontFamily: '"JetBrains Mono", monospace',
+              fontFamily: FONT.mono,
               fontSize: 9.5,
               fontWeight: 700,
               letterSpacing: 1.6,
@@ -500,81 +366,6 @@ function Side({ d, tel, mirror }: SideProps) {
             ))}
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-export function STCarCompare({ state }: Props) {
-  const { roster, drivers, raceState } = state;
-  const { driverIds } = state.overlayState.carTelemetry;
-
-  if (driverIds.length < 2) return null;
-  const [aId, bId] = driverIds;
-
-  const rosterById = Object.fromEntries(roster.map((d) => [d.id, d]));
-  const aTel = drivers[aId]?.telemetry;
-  const bTel = drivers[bId]?.telemetry;
-  const dA = rosterById[aId];
-  const dB = rosterById[bId];
-
-  if (!aTel || !bTel || !dA || !dB) return null;
-
-  const aPos = raceState.order.indexOf(aId) + 1;
-  const bPos = raceState.order.indexOf(bId) + 1;
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        right: 28,
-        bottom: 28,
-        width: 700,
-        fontFamily: '"Barlow Condensed", sans-serif',
-        color: ST.ink,
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          background: ST.surfaceSolid,
-          padding: "8px 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          clipPath: clip.slashRight,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ width: 4, height: 18, background: ST.accent }} />
-          <span
-            style={{
-              fontFamily: "Oswald, sans-serif",
-              fontSize: 15,
-              fontWeight: 700,
-              letterSpacing: 3,
-            }}
-          >
-            BATTLE · LIVE TELEMETRY
-          </span>
-        </div>
-        <span
-          style={{
-            fontFamily: '"JetBrains Mono", monospace',
-            fontSize: 10,
-            color: ST.inkDim,
-            letterSpacing: 1.6,
-          }}
-        >
-          P{aPos} VS P{bPos}
-        </span>
-      </div>
-
-      {/* Two-column layout */}
-      <div style={{ display: "flex", position: "relative", marginTop: 2 }}>
-        <Side d={dA} tel={aTel} mirror={false} />
-        <div style={{ width: 2, background: ST.accent }} />
-        <Side d={dB} tel={bTel} mirror={false} />
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { api } from '../lib/api';
-import type { OverlayData, OverlayState, RaceState, WSMessage } from '../types';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { api } from "../lib/api";
+import type { OverlayData, OverlayState, RaceState, WSMessage } from "../types";
 
 const DEFAULT_RACE_STATE: RaceState = {
-  mode: 'practice',
+  mode: "practice",
   trackId: null,
   sectorCount: 0,
   lap: 0,
@@ -13,10 +13,11 @@ const DEFAULT_RACE_STATE: RaceState = {
 };
 
 const DEFAULT_OVERLAY_STATE: OverlayState = {
-  standings:      { visible: false },
-  sector:         { visible: false, driverIds: [] },
-  carTelemetry:   { visible: false, driverIds: [] },
+  standings: { visible: false },
+  sector: { visible: false, driverIds: [] },
+  carTelemetry: { visible: false, driverIds: [] },
   driverShowcase: { visible: false, driverId: null },
+  driverTelemetry: { visible: false, driverId: null },
 };
 
 const DEFAULT_STATE: OverlayData = {
@@ -26,6 +27,7 @@ const DEFAULT_STATE: OverlayData = {
   drivers: {},
   focusedId: null,
   overlayState: DEFAULT_OVERLAY_STATE,
+  standingsV2: [],
 };
 
 const RECONNECT_DELAY_MS = 3000;
@@ -45,7 +47,10 @@ export function useOverlayWS() {
     wsRef.current = ws;
 
     ws.onopen = () => {
-      if (unmountedRef.current) { ws.close(); return; }
+      if (unmountedRef.current) {
+        ws.close();
+        return;
+      }
       setConnected(true);
     };
 
@@ -54,14 +59,14 @@ export function useOverlayWS() {
       try {
         const msg = JSON.parse(event.data) as WSMessage;
 
-        if (msg.type === 'roster') {
-          setState(prev => ({
+        if (msg.type === "roster") {
+          setState((prev) => ({
             ...prev,
             session: msg.session,
             roster: msg.roster,
           }));
-        } else if (msg.type === 'state') {
-          setState(prev => {
+        } else if (msg.type === "state") {
+          setState((prev) => {
             const order = msg.raceState.order;
             const focusedId = order[0] ?? prev.focusedId;
 
@@ -71,6 +76,7 @@ export function useOverlayWS() {
               drivers: msg.drivers,
               focusedId,
               overlayState: msg.overlayState ?? prev.overlayState,
+              standingsV2: msg.standingsV2,
             };
           });
         }

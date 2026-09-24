@@ -1,6 +1,7 @@
 import type { OverlayData } from '../../../types';
-import { fmtLapMs, fmtSectorMs } from '../../../lib/utils';
-import { ST, clip, sectorColor } from './tokens';
+import { fmtLapMs, fmtSectorMs, createRosterLookup } from '../../../lib/utils';
+import { ST, FONT, clip, sectorColor } from './tokens';
+import { STPanelHeader } from './STPanelHeader';
 
 interface Props {
   state: OverlayData;
@@ -14,7 +15,7 @@ export function STSectorCompare({ state }: Props) {
   if (driverIds.length < 2 || sectorCount === 0) return null;
 
   const [aId, bId] = driverIds;
-  const rosterById = Object.fromEntries(roster.map(d => [d.id, d]));
+  const rosterById = createRosterLookup(roster);
   const isRace = mode === 'race';
 
   const Row = ({ driverId, isTop }: { driverId: number; isTop: boolean }) => {
@@ -35,21 +36,21 @@ export function STSectorCompare({ state }: Props) {
           display: 'flex', flexDirection: 'column', justifyContent: 'center',
         }}>
           <div style={{
-            fontFamily: 'Oswald, sans-serif',
+            fontFamily: FONT.title,
             fontSize: 19, fontWeight: 700, letterSpacing: 1, lineHeight: 1,
           }}>
             {d.name}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
             <span style={{
-              fontFamily: '"JetBrains Mono", monospace',
+              fontFamily: FONT.mono,
               fontSize: 10, fontWeight: 700, color: ST.inkDim, letterSpacing: 1,
             }}>
               {d.country}
             </span>
             <span style={{ width: 3, height: 3, background: ST.inkVeryDim }} />
             <span style={{
-              fontFamily: '"JetBrains Mono", monospace',
+              fontFamily: FONT.mono,
               fontSize: 10, color: ST.inkVeryDim, letterSpacing: 0.8,
             }}>
               {fmtLapMs(tel?.bestLaptime)}
@@ -72,14 +73,14 @@ export function STSectorCompare({ state }: Props) {
               padding: '10px 0',
             }}>
               <div style={{
-                fontFamily: '"JetBrains Mono", monospace',
+                fontFamily: FONT.mono,
                 fontSize: 10, letterSpacing: 1.8, fontWeight: 700,
                 color: status === 'neutral' ? ST.inkVeryDim : 'rgba(0,0,0,0.6)',
               }}>
                 S{i + 1}
               </div>
               <div style={{
-                fontFamily: 'Oswald, sans-serif',
+                fontFamily: FONT.title,
                 fontSize: 22, fontWeight: 700,
                 fontVariantNumeric: 'tabular-nums',
                 color: status === 'neutral' ? ST.ink : '#0a0a0d',
@@ -97,32 +98,18 @@ export function STSectorCompare({ state }: Props) {
   return (
     <div style={{
       position: 'absolute', right: 28, top: 28, width: 560,
-      fontFamily: '"Barlow Condensed", system-ui, sans-serif',
+      fontFamily: FONT.body,
       color: ST.ink,
       clipPath: clip.slashLeft,
     }}>
-      {/* Header */}
-      <div style={{
-        background: ST.surfaceSolid,
-        padding: '10px 18px 10px 22px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ width: 4, height: 24, background: ST.accent }} />
-          <span style={{
-            fontFamily: 'Oswald, sans-serif',
-            fontSize: 17, fontWeight: 700, letterSpacing: 3, color: ST.ink,
-          }}>
-            SECTOR COMPARE
-          </span>
-        </div>
-        <div style={{
-          fontFamily: '"JetBrains Mono", monospace',
-          fontSize: 10, color: ST.accent, letterSpacing: 2, fontWeight: 700,
-        }}>
-          {isRace ? '◆ TIMING LIVE' : '◆ BEST LAP'}
-        </div>
-      </div>
+        <STPanelHeader
+          title="SECTOR COMPARE"
+          status={isRace ? '◆ TIMING LIVE' : '◆ BEST LAP'}
+          padding="10px 18px 10px 22px"
+          titleSize={17}
+          gap={12}
+          clipSide="none"
+        />
 
       <Row driverId={aId} isTop />
       <Row driverId={bId} isTop={false} />

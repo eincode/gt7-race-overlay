@@ -33,6 +33,18 @@
   50%       { opacity: 1; }
 }
 
+/* Control V2 bottom sheet entrance */
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Control V2 online indicator pulse */
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.6); opacity: 0.5; }
+}
+
 @keyframes stShowcaseIn {
   from {
     opacity: 0;

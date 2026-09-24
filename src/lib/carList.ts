@@ -581,11 +581,90 @@ const RAW = `24,180SX Type X '96,28
 3602,U9 '24,165
 3603,Twingo '93,34`;
 
+export const CAR_MAKERS = {
+  3: "Alfa Romeo",
+  4: "Aston Martin",
+  5: "Audi",
+  6: "BMW",
+  7: "Chevrolet",
+  9: "Citroën",
+  10: "Daihatsu",
+  11: "Dodge",
+  12: "Fiat",
+  13: "Ford",
+  15: "Honda",
+  16: "Hyundai",
+  17: "Jaguar",
+  18: "Lancia",
+  21: "Mazda",
+  22: "Mercedes-Benz",
+  25: "Mitsubishi",
+  28: "Nissan",
+  30: "Pagani",
+  32: "Peugeot",
+  33: "Gran Turismo",
+  34: "Renault",
+  35: "RUF",
+  36: "Shelby",
+  38: "Subaru",
+  39: "Suzuki",
+  43: "Toyota",
+  44: "TVR",
+  46: "Volkswagen",
+  49: "INFINITI",
+  50: "Lexus",
+  51: "MINI",
+  52: "Pontiac",
+  55: "Plymouth",
+  57: "Autobianchi",
+  59: "Amuse",
+  65: "DeLorean",
+  69: "Volvo",
+  86: "Alpine",
+  87: "RE Amemiya",
+  93: "Chaparral",
+  110: "Ferrari",
+  112: "Lamborghini",
+  113: "Bugatti",
+  116: "Maserati",
+  117: "McLaren",
+  119: "Tesla",
+  121: "KTM",
+  125: "Abarth",
+  134: "Iso",
+  135: "Italdesign",
+  136: "Porsche",
+  140: "De Tomaso",
+  141: "Radical",
+  143: "Dallara",
+  144: "BAC",
+  146: "Willys",
+  147: "Chevrolet",
+  148: "Mach Forty",
+  149: "Greddy",
+  150: "Wicked Fabrication",
+  151: "Roadster Shop",
+  152: "Genesis",
+  153: "Mercedes-AMG",
+  154: "DS Automobiles",
+  155: "NISMO",
+  156: "Ford",
+  157: "Honda",
+  158: "BVLGARI",
+  159: "Škoda",
+  160: "AFEELA",
+  161: "Opel",
+  162: "NISMO",
+  163: "Polestar",
+  164: "Xiaomi",
+  165: "Yangwang",
+};
+
 export const CAR_LIST: Car[] = RAW.trim()
-  .split('\n')
-  .map(line => {
-    const firstComma = line.indexOf(',');
-    const lastComma = line.lastIndexOf(',');
+  .split("\n")
+  .map((line) => {
+    const firstComma = line.indexOf(",");
+    const lastComma = line.lastIndexOf(",");
     return {
       id: parseInt(line.slice(0, firstComma), 10),
       name: line.slice(firstComma + 1, lastComma),
@@ -593,7 +672,3 @@ export const CAR_LIST: Car[] = RAW.trim()
     };
   })
   .sort((a, b) => a.name.localeCompare(b.name));
-
-export function getCarById(id: number): Car | undefined {
-  return CAR_LIST.find(c => c.id === id);
-}

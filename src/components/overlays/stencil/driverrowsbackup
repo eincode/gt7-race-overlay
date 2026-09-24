@@ -1,0 +1,133 @@
+<div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {order.map((id, idx) => {
+          const d = rosterById[id];
+          if (!d) return null;
+
+          const dv = drivers[id]?.derived;
+          const tel = drivers[id]?.telemetry;
+          const isLeader = idx === 0;
+          const isFocused = id === focusedId;
+
+          // Gap: use 1-second throttled snapshot; fall back to live value before first snapshot
+          const gap = gapSnapshot[id] ?? dv?.gapToAhead ?? 0;
+          const gapToLeader = dv?.gapToLeader ?? 0;
+          const gapHidden = !isLeader && gapToLeader === 0 && (dv?.gapToAhead ?? 0) === 0;
+
+          // Right column — race: gap/PIT/P1; qualifying/practice: best lap time
+          const rightText = isRace
+            ? isLeader
+              ? "P1"
+              : dv?.pitted
+                ? "PIT"
+                : gapHidden
+                  ? "—"
+                  : `+${gap.toFixed(3)}`
+            : tel?.bestLaptime
+              ? fmtLapMs(tel.bestLaptime)
+              : "—";
+
+          const rightColor = isRace
+            ? isLeader
+              ? ST.leader
+              : dv?.pitted
+                ? ST.fastest
+                : ST.inkDim
+            : isLeader
+              ? ST.leader
+              : ST.inkDim;
+
+          return (
+            <div
+              key={id}
+              style={{
+                position: "relative",
+                background: ST.surface,
+                clipPath: clip.slashRight,
+                display: "grid",
+                gridTemplateColumns: "52px 28px 1fr 88px",
+                alignItems: "center",
+                gap: 10,
+                padding: "5px 24px 5px 0",
+                height: 38,
+              }}
+            >
+              {/* Position number */}
+              <div
+                style={{
+                  background: isLeader
+                    ? ST.leader
+                    : isFocused
+                      ? ST.accent
+                      : "#000",
+                  color: isLeader || isFocused ? "#0a0a0d" : ST.ink,
+                  fontFamily: FONT.title,
+                  fontSize: 26,
+                  fontWeight: 700,
+                  letterSpacing: 0,
+                  fontVariantNumeric: "tabular-nums",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {String(idx + 1).padStart(2, "0")}
+              </div>
+
+              {/* Country code */}
+              <div
+                style={{
+                  fontSize: 11,
+                  fontFamily: FONT.mono,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  color: ST.inkDim,
+                  textAlign: "center",
+                }}
+              >
+                {d.country}
+              </div>
+
+              {/* Name */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  minWidth: 0,
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: FONT.title,
+                    fontSize: 16,
+                    fontWeight: 600,
+                    letterSpacing: 0.6,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    lineHeight: 1,
+                  }}
+                >
+                  {d.name}
+                </div>
+              </div>
+
+              {/* Right column */}
+              <div
+                style={{
+                  textAlign: "right",
+                  fontFamily: FONT.title,
+                  fontVariantNumeric: "tabular-nums",
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: rightColor,
+                  letterSpacing: 0.5,
+                }}
+              >
+                {rightText}
+              </div>
+            </div>
+          );
+        })}
+      </div>
