@@ -81,8 +81,8 @@ export function SetupPage({
           <span className="font-jetbrains text-[10px] tracking-[0.16em] text-zinc-500">
             TRACK
           </span>
-          <span className="font-oswald text-[17px] font-semibold tracking-[0.1em] text-zinc-100 max-w-[180px] truncate">
-            {track ? track.name.toUpperCase() : "—"}
+          <span className="font-oswald text-[17px] font-semibold tracking-[0.1em] text-zinc-100 max-w-[320px] truncate">
+            {track ? `${track.name} · ${track.layoutName}`.toUpperCase() : "—"}
           </span>
         </div>
         <button
@@ -107,6 +107,7 @@ export function SetupPage({
 
       {showSelector && (
         <TrackSelector
+          selectedId={track?.id ?? null}
           onClose={() => setShowSelector(false)}
           onSelect={(t) => {
             setTrack(t);

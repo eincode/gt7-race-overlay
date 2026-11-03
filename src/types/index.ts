@@ -152,9 +152,39 @@ export interface DriversListResponse {
   }>;
 }
 
+/** One driveable layout of a venue — `id` is the trackId sent to the server. */
+export interface TrackLayout {
+  id: string;
+  name: string;
+  totalLength: number;
+  totalSectors: number;
+}
+
+/** A venue as returned by GET /tracks, grouping its layouts. */
+export interface TrackVenue {
+  id: string;
+  name: string;
+  country: string;
+  imagePath: string;
+  layouts: TrackLayout[];
+}
+
+/** Top-down [x, z] geometry from GET /tracks/:id/map. */
+export interface TrackMapData {
+  id: string;
+  centerline: [number, number][];
+  leftEdge: [number, number][];
+  rightEdge: [number, number][];
+  sectorBoundaries: [number, number][];
+  /** Each sector boundary as edge-to-edge endpoints across the road. */
+  sectors: { left: [number, number]; right: [number, number] }[];
+}
+
+/** The selected layout, flattened with its venue's info. */
 export interface Track {
   id: string;
   name: string;
+  layoutName: string;
   country: string;
   totalLength: number;
   totalSectors: number;

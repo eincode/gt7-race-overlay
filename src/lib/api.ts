@@ -4,7 +4,8 @@ import type {
   RosterEntry,
   SessionMode,
   SessionResponse,
-  Track,
+  TrackMapData,
+  TrackVenue,
 } from "../types";
 
 type OkResponse = { ok: boolean };
@@ -67,8 +68,14 @@ export const api = {
     return fetchJSON<DriversListResponse>(`${baseUrl()}/drivers`);
   },
 
-  getTracks(): Promise<Track[]> {
-    return fetchJSON<Track[]>(`${baseUrl()}/tracks`);
+  getTracks(): Promise<TrackVenue[]> {
+    return fetchJSON<TrackVenue[]>(`${baseUrl()}/tracks`);
+  },
+
+  getTrackMap(trackId: string): Promise<TrackMapData> {
+    return fetchJSON<TrackMapData>(
+      `${baseUrl()}/tracks/${encodeURIComponent(trackId)}/map`,
+    );
   },
 
   joinDriver(

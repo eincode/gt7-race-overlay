@@ -1,6 +1,7 @@
 import type { Track } from "../../types";
 import { InfoCard } from "./InfoCard";
-import { TrackMapImage, trackSpec } from "./TrackSelector";
+import { TrackMap } from "./TrackMap";
+import { trackSpec } from "./TrackSelector";
 
 export function TrackSelection({
   track,
@@ -17,13 +18,10 @@ export function TrackSelection({
         className="flex w-full items-center gap-4 rounded-[14px] border border-white/11 bg-[#232326] p-[14px]"
       >
         <span
-          className={`flex h-[104px] w-[104px] shrink-0 items-center justify-center overflow-hidden rounded-[11px] border border-white/9 p-1 ${track ? "bg-white" : "bg-[repeating-linear-gradient(135deg,#202024_0px,#202024_6px,#26262b_6px,#26262b_12px)]"}`}
+          className={`flex h-[104px] w-[104px] shrink-0 items-center justify-center overflow-hidden rounded-[11px] border border-white/9 p-1 ${track ? "bg-[#141416]" : "bg-[repeating-linear-gradient(135deg,#202024_0px,#202024_6px,#26262b_6px,#26262b_12px)]"}`}
         >
           {track ? (
-            <TrackMapImage
-              imagePath={track.imagePath}
-              className="h-full w-full rounded-[8px] object-contain"
-            />
+            <TrackMap trackId={track.id} className="h-full w-full p-1" />
           ) : (
             <span className="flex h-full w-full items-center justify-center font-jetbrains text-[9px] leading-[1.6] tracking-[0.14em] whitespace-pre-line text-[#5c5c64]">
               TRACK MAP
@@ -38,6 +36,9 @@ export function TrackSelection({
               </span>
               <span className="font-oswald text-[27px] font-semibold leading-[1.05] tracking-[0.04em] text-zinc-100">
                 {track.name}
+              </span>
+              <span className="font-jetbrains text-xs font-bold tracking-[0.12em] text-red-400 uppercase">
+                {track.layoutName}
               </span>
               <span className="font-jetbrains text-xs tracking-[0.08em] text-[#8b8b93]">
                 {trackSpec(track)}
