@@ -179,7 +179,7 @@ Base URL from `VITE_SERVER_URL`, fallback `http://localhost:3000`.
 
 - **Gap throttling**: `STStandings` snapshots `gapToAhead` once per second in race mode. Resets timer on mode switch.
 - **Gap hiding**: Non-leader with `gapToLeader === 0` AND live `gapToAhead === 0` → `"—"` (not `+0.000`).
-- **Sector freeze**: `STCurrentSector` freezes times for 10s after driver B crosses a sector line. A = higher-standing driver, B = lower. Delta = B − A, green if B faster, red if slower.
+- **Sector freeze**: `STCurrentSector` freezes times for 5s after driver B crosses a sector line. A = higher-standing driver, B = lower. Delta = B − A, green if B faster, red if slower.
 - **Gear shift indicator**: Gold up-arrow pulses when `suggestedGear > currentGear` AND RPM > `minAlertRPM`. Gear `0` displays as `"N"`.
 - **Steering angle**: Optional `steeringAngle` field. When absent, `STDriverTelemetry` shows centred neutral. Raw ±90° normalized to 0–100% L/R track.
 - **Country picker**: Filters 173 countries by name/code via `onMouseDown` (prevents blur races), caps results at 40.

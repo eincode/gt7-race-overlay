@@ -11,7 +11,7 @@ export type Phase =
   | { kind: 'live' }
   | { kind: 'frozen'; bTimeMs: number; aTimeMs: number; deltaMs: number; sectorIdx: number };
 
-const HOLD_MS = 10_000;
+const HOLD_MS = 5_000;
 
 /** Prefer server-provided value; fall back to elapsed-timer difference. */
 function bestSectorTime(fromServer: number, lapNow: number, lapEntry: number): number {
