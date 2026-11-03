@@ -98,7 +98,7 @@ export function ControlPage() {
       try {
         const nextId =
           session.roster.reduce((max, r) => Math.max(max, r.id), 0) + 1;
-        await api.addDriver({ id: nextId, name: d.name, country: d.country });
+        await api.addDriver({ id: nextId, name: d.name, country: d.country, psnId: d.psnId ?? "" });
         if (d.photoBase64) {
           saveDriverPhotos({ ...loadDriverPhotos(), [nextId]: d.photoBase64 });
         }

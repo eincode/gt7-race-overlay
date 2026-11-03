@@ -72,6 +72,16 @@ export function AddDriverForm({ onAdd }: { onAdd: (d: LocalDriver) => void }) {
             )}
           </div>
 
+          {/* PSN ID */}
+          <div>
+            <Label>PSN ID</Label>
+            <Input
+              value={form.psnId}
+              onChange={(e) => set("psnId", e.target.value)}
+              placeholder="PSN_ID (optional)"
+            />
+          </div>
+
           {/* Country picker */}
           <div>
             <Label>Country *</Label>

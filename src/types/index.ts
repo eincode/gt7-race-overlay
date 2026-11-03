@@ -6,6 +6,7 @@ export interface RosterEntry {
   id: number;
   name: string;
   country: string;
+  psnId: string;
 }
 
 export interface Session {
@@ -144,6 +145,7 @@ export interface DriversListResponse {
   drivers: Array<{
     id: number;
     name: string;
+    psnId: string;
     carCode: number;
     connected: boolean;
     lastSeen: number;

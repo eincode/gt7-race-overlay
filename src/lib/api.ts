@@ -73,7 +73,7 @@ export const api = {
 
   joinDriver(
     driverId: number,
-  ): Promise<{ token: string; driverId: number; name: string }> {
+  ): Promise<{ token: string; driverId: number; name: string; psnId: string }> {
     return fetchJSON(`${baseUrl()}/driver/join`, {
       method: "POST",
       body: JSON.stringify({ driverId }),

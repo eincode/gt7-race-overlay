@@ -63,13 +63,18 @@ export function ControlV2() {
   }, []);
 
   const handleAddDriver = useCallback(
-    async (name: string, country: string, photoBase64: string | null) => {
+    async (
+      name: string,
+      country: string,
+      photoBase64: string | null,
+      psnId: string,
+    ) => {
       if (!session) return;
       setAddError(null);
       try {
         const nextId =
           session.roster.reduce((max, r) => Math.max(max, r.id), 0) + 1;
-        await api.addDriver({ id: nextId, name, country });
+        await api.addDriver({ id: nextId, name, country, psnId });
         if (photoBase64) {
           saveDriverPhotos({ ...loadDriverPhotos(), [nextId]: photoBase64 });
         }
@@ -174,8 +179,8 @@ export function ControlV2() {
               <DriversPage
                 roster={session.roster}
                 onRemove={(id) => void handleRemoveDriver(id)}
-                onAddDriver={(name, country, photo) =>
-                  void handleAddDriver(name, country, photo)
+                onAddDriver={(name, country, photo, psnId) =>
+                  void handleAddDriver(name, country, photo, psnId)
                 }
                 error={addError}
               />
@@ -198,13 +203,14 @@ export function ControlV2() {
             onRemove={(id) =>
               setDraftRoster((prev) => prev.filter((d) => d.id !== id))
             }
-            onAddDriver={(name, country, photoBase64) =>
+            onAddDriver={(name, country, photoBase64, psnId) =>
               setDraftRoster((prev) => [
                 ...prev,
                 {
                   id: prev.reduce((max, d) => Math.max(max, d.id), 0) + 1,
                   name,
                   country,
+                  psnId,
                   photoBase64,
                 },
               ])

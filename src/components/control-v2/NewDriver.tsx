@@ -6,17 +6,22 @@ import { InfoCard } from "./InfoCard";
 export function NewDriver({
   onAdd,
 }: {
-  onAdd: (name: string, country: string, photoBase64: string | null) => void;
+  onAdd: (name: string, country: string,
+    photoBase64: string | null,
+    psnId: string,
+  ) => void;
 }) {
   const [name, setName] = useState("");
   const [country, setCountry] = useState<string | null>(null);
+  const [psnId, setPsnId] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
 
   const submit = () => {
     if (!name.trim() || !country) return;
-    onAdd(name.trim(), country, photo);
+    onAdd(name.trim(), country, photo, psnId.trim());
     setName("");
     setCountry(null);
+    setPsnId("");
     setPhoto(null);
   };
 
@@ -46,6 +51,17 @@ export function NewDriver({
               placeholder="M. LASTNAME"
               value={name}
               onChange={(e) => setName(e.target.value.toUpperCase())}
+              className="h-[54px] w-full rounded-[11px] border border-[#3f3f46] bg-[#141416] px-4 font-jetbrains text-base text-zinc-200 outline-none placeholder:text-zinc-500 focus:border-white/25"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="font-jetbrains text-[10px] font-bold tracking-[0.16em] text-zinc-500">
+              PSN ID
+            </span>
+            <input
+              placeholder="PSN_ID (optional)"
+              value={psnId}
+              onChange={(e) => setPsnId(e.target.value)}
               className="h-[54px] w-full rounded-[11px] border border-[#3f3f46] bg-[#141416] px-4 font-jetbrains text-base text-zinc-200 outline-none placeholder:text-zinc-500 focus:border-white/25"
             />
           </label>

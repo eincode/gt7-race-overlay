@@ -10,7 +10,12 @@ export function DriversPage({
 }: {
   roster: RosterEntry[];
   onRemove: (id: number) => void;
-  onAddDriver: (name: string, country: string, photoBase64: string | null) => void;
+  onAddDriver: (
+    name: string,
+    country: string,
+    photoBase64: string | null,
+    psnId: string,
+  ) => void;
   error: string | null;
 }) {
   return (

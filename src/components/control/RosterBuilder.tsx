@@ -13,12 +13,12 @@ import type { LocalDriver } from "./localDriver";
 // ── Demo roster (no photos) ──────────────────────────────────────────────────
 
 const DEMO_LOCAL: LocalDriver[] = [
-  { tempId: "d1", name: "M. TANAKA", country: "JP", photoBase64: null },
-  { tempId: "d2", name: "K. SCHMIDT", country: "DE", photoBase64: null },
-  { tempId: "d3", name: "L. ROSSI", country: "IT", photoBase64: null },
-  { tempId: "d4", name: "A. BENNETT", country: "GB", photoBase64: null },
-  { tempId: "d5", name: "R. SILVA", country: "BR", photoBase64: null },
-  { tempId: "d6", name: "J. DUBOIS", country: "FR", photoBase64: null },
+  { tempId: "d1", name: "M. TANAKA", country: "JP", psnId: "", photoBase64: null },
+  { tempId: "d2", name: "K. SCHMIDT", country: "DE", psnId: "", photoBase64: null },
+  { tempId: "d3", name: "L. ROSSI", country: "IT", psnId: "", photoBase64: null },
+  { tempId: "d4", name: "A. BENNETT", country: "GB", psnId: "", photoBase64: null },
+  { tempId: "d5", name: "R. SILVA", country: "BR", psnId: "", photoBase64: null },
+  { tempId: "d6", name: "J. DUBOIS", country: "FR", psnId: "", photoBase64: null },
 ];
 
 // ── Roster builder ───────────────────────────────────────────────────────────
@@ -55,6 +55,7 @@ export function RosterBuilder({
         id: i + 1,
         name: d.name,
         country: d.country,
+        psnId: d.psnId ?? "",
       }));
       const res = await api.createSession(roster, mode, trackId.trim());
 

@@ -17,7 +17,12 @@ export function SetupPage({
   driverCount: number;
   roster: (RosterEntry & { photoBase64: string | null })[];
   onRemove: (id: number) => void;
-  onAddDriver: (name: string, country: string, photoBase64: string | null) => void;
+  onAddDriver: (
+    name: string,
+    country: string,
+    photoBase64: string | null,
+    psnId: string,
+  ) => void;
   onCreated: (session: Session) => void;
 }) {
   const [track, setTrack] = useState<Track | null>(null);
@@ -34,6 +39,7 @@ export function SetupPage({
         id: i + 1,
         name: d.name,
         country: d.country,
+        psnId: d.psnId ?? "",
       }));
       const res = await api.createSession(sessionRoster, "practice", track.id);
 
