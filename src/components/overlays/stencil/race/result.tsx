@@ -271,30 +271,45 @@ export default function RaceStandingsOverlay() {
 
   const rows = useMemo(() => {
     const rosterById = new Map(roster.map((d) => [d.id, d]));
-    const results: QualifyingResult[] = [];
-    for (const [id, d] of Object.entries(standingsV2)) {
-      const driver = drivers[Number(id)];
-      const entry = rosterById.get(Number(id));
+    const results: (QualifyingResult & {
+      hasTime: boolean;
+      lapsDown: number;
+    })[] = [];
+    // Server orders by finish order, then position — a lapped driver can have
+    // a shorter total time than the winner, so never re-sort by time.
+    const ordered = [...standingsV2].sort((a, b) => a.position - b.position);
+    for (const d of ordered) {
+      const id = Number(d.driverId);
+      const driver = drivers[id];
+      const entry = rosterById.get(id);
       if (!entry) continue;
-      const car = CAR_LIST.find((car) => car.id === driver.telemetry?.carCode);
+      const car = CAR_LIST.find((car) => car.id === driver?.telemetry?.carCode);
       results.push({
         name: entry.name,
         country: entry.country,
         car: `${car?.makerId ? (CAR_MAKERS as Record<number, string>)[car.makerId] : "—"} ${car?.name ?? "—"}`,
-        lap: (d.totalTime ?? 0) / 1000,
+        // totalTime is already in seconds (server clock is performance.now() / 1000)
+        lap: d.totalTime ?? 0,
+        hasTime: d.totalTime !== null,
+        lapsDown: d.lapsDown ?? 0,
       });
     }
-    const sorted = [...results].sort((a, b) => a.lap - b.lap);
-    const best = sorted.length ? sorted[0].lap : 0;
-    return sorted.map((d, i) => ({
+    const best = results.length ? results[0].lap : 0;
+    const gapLabel = (d: (typeof results)[number], i: number) => {
+      if (i === 0) return "WINNER";
+      // A lapped driver's time-to-winner is meaningless — they ran fewer laps.
+      if (d.lapsDown > 0) return `+${d.lapsDown} LAP${d.lapsDown > 1 ? "S" : ""}`;
+      return d.hasTime ? `+${(d.lap - best).toFixed(3)}` : "—";
+    };
+    return results.map((d, i) => ({
       ...d,
       pos: i + 1,
-      lapLabel: formatLap(d.lap),
-      gapLabel: i === 0 ? "POLE" : `+${(d.lap - best).toFixed(3)}`,
+      lapLabel: d.hasTime ? formatLap(d.lap) : "—",
+      gapLabel: gapLabel(d, i),
       lead: i === 0,
       index: i,
     }));
-  }, [drivers, roster]);
+  }, [drivers, roster, standingsV2]);
 
   const half = Math.ceil(rows.length / 2);
   const columns = [rows.slice(0, half), rows.slice(half)];
@@ -376,7 +391,7 @@ export default function RaceStandingsOverlay() {
         <span style={{ flex: 1 }} />
         <span
           style={S.footerNote}
-        >{`${rows.length} DRIVERS CLASSIFIED · POLE ${pole}`}</span>
+        >{`${rows.length} DRIVERS CLASSIFIED · WINNER ${pole}`}</span>
       </footer>
     </div>
   );

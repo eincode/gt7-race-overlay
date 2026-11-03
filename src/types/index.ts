@@ -79,12 +79,16 @@ export interface DriverState {
   derived: DerivedData;
 }
 
+/** finished = chequered flag: the first driver has crossed the line. Always "racing" outside race mode. */
+export type RacePhase = "racing" | "finalLap" | "finished";
+
 export interface RaceState {
   mode: SessionMode;
   trackId: string | null;
   sectorCount: number;
-  lap: number;
+  lap: number; // clamped to totalLaps by the server
   totalLaps: number;
+  phase: RacePhase;
   dayProgression: number;
   order: number[];
 }
@@ -112,6 +116,9 @@ export interface StandingsRow {
   gapSeconds: number | null;
   gapMetres: number | null;
   totalTime: number | null;
+  finished: boolean;
+  /** Whole laps behind the leader. Optional until every relay server sends it. */
+  lapsDown?: number;
 }
 
 export type WSMessage = RosterBroadcast | StateBroadcast;

@@ -1,8 +1,21 @@
+import { useEffect, useRef, useState } from "react";
+import {
+  formatGap,
+  useSessionBestLaps,
+  useStandingsSnapshot,
+} from "../../../hooks/useStandings";
 import { createRosterLookup, fmtTrackName } from "../../../lib/utils";
 import type { OverlayData } from "../../../types";
 import { Badge } from "./Badge";
 import { formatLap } from "./qualifying/result";
-import { clip, FONT, panelMotion, ST, stripes } from "./tokens";
+import { chequered, clip, FONT, panelMotion, ST, stripes } from "./tokens";
+
+const ROW_HEIGHT = 38;
+const ROW_GAP = 2;
+const ROW_SLOT = ROW_HEIGHT + ROW_GAP;
+const SWAP_MS = 650;
+
+type Move = "gain" | "loss";
 
 interface Props {
   state: OverlayData;
@@ -10,33 +23,71 @@ interface Props {
 }
 
 export function STStandings({ state, isVisible }: Props) {
-  const { roster, raceState } = state;
-  const { mode, lap, totalLaps, trackId } = raceState;
+  const { roster, raceState, drivers } = state;
+  const { mode, lap, totalLaps, trackId, phase, order } = raceState;
 
   const rosterById = createRosterLookup(roster);
   const trackName = fmtTrackName(trackId);
   const isRace = mode === "race";
+  const isFinalLap = isRace && phase === "finalLap";
+  const isChequered = isRace && phase === "finished";
+
+  // Order and gaps come from one snapshot that changes at most once a second,
+  // so they always agree and a position battle slides at most once a second.
+  // Per-frame data that isn't order (best lap, finished marker, names) stays
+  // live, looked up by id.
+  const standings = useStandingsSnapshot(order, drivers, state.standingsV2);
+  const bestLaps = useSessionBestLaps(drivers,`${state.session?.id}:${mode}`);
+  // Chequered-flag marker per driver, still taken from the server's standings.
+  const finishedIds = new Set(
+    state.standingsV2.filter((s) => s.finished).map((s) => Number(s.driverId)),
+  );
+
+  // ── Overtake detection ────────────────────────────────────────────────
+  // Compare each driver's slot against the previous order; flag gainers/losers
+  // so the gainer's row is layered above the one it passes while sliding.
+  const orderKey = standings.map((s) => s.id).join(",");
+  const prevIndexRef = useRef(new Map<number, number>());
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const [moves, setMoves] = useState<Record<number, Move>>({});
+
+  useEffect(() => {
+    const prev = prevIndexRef.current;
+    const next = new Map<number, number>();
+    const changed = new Map<number, Move>();
+    const ids = orderKey ? orderKey.split(",").map(Number) : [];
+    ids.forEach((id, i) => {
+      next.set(id, i);
+      const p = prev.get(id);
+      if (p !== undefined && p !== i) changed.set(id, i < p ? "gain" : "loss");
+    });
+    prevIndexRef.current = next;
+    if (changed.size === 0) return;
+
+    setMoves((m) => ({ ...m, ...Object.fromEntries(changed) }));
+    const timer = setTimeout(() => {
+      setMoves((m) => {
+        const copy = { ...m };
+        changed.forEach((move, id) => {
+          if (copy[id] === move) delete copy[id];
+        });
+        return copy;
+      });
+    }, SWAP_MS);
+    timersRef.current.push(timer);
+  }, [orderKey]);
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  // Render rows in a stable DOM order (by driver ID) and position them with
+  // translateY — React re-ordering DOM nodes would cancel the CSS transition.
+  const rows = standings
+    .map((d, idx) => ({ d, idx }))
+    .sort((a, b) => a.d.id - b.d.id);
   // const modeLabel = mode.toUpperCase();
-
-  // // ── Throttled gap snapshot (race mode only) ─────────────────────────────
-  // const lastGapUpdateRef = useRef(0);
-  // const [gapSnapshot, setGapSnapshot] = useState<Record<number, number>>({});
-
-  // useEffect(() => {
-  //   if (!isRace) {
-  //     // Reset so switching back to race shows fresh values immediately
-  //     lastGapUpdateRef.current = 0;
-  //     return;
-  //   }
-  //   const now = Date.now();
-  //   if (now - lastGapUpdateRef.current < GAP_THROTTLE_MS) return;
-  //   lastGapUpdateRef.current = now;
-  //   setGapSnapshot(
-  //     Object.fromEntries(
-  //       order.map((id) => [id, drivers[id]?.derived?.gapToAhead ?? 0]),
-  //     ),
-  //   );
-  // }, [isRace, drivers, order]);
 
   return (
     <div
@@ -89,10 +140,14 @@ export function STStandings({ state, isVisible }: Props) {
                 fontVariantNumeric: "tabular-nums",
               }}
             >
-              {mode === "race"
-                ? `LAP ${String(lap).padStart(2, "0")}`
-                : mode.toLocaleUpperCase()}
-              {mode === "race" && totalLaps > 0 && (
+              {!isRace
+                ? mode.toLocaleUpperCase()
+                : isChequered
+                  ? "FINISH"
+                  : isFinalLap
+                    ? "FINAL LAP"
+                    : `LAP ${String(lap).padStart(2, "0")}`}
+              {isRace && !isChequered && !isFinalLap && totalLaps > 0 && (
                 <span
                   style={{
                     color: ST.inkVeryDim,
@@ -118,17 +173,38 @@ export function STStandings({ state, isVisible }: Props) {
               {trackName}
             </div>
           </div>
-          <Badge letterSpacing={2}>LIVE</Badge>
+          {isChequered ? (
+            <div
+              title="Chequered flag"
+              style={{
+                width: 56,
+                height: 24,
+                background: chequered(6),
+                clipPath: clip.gearSlash,
+              }}
+            />
+          ) : (
+            <Badge letterSpacing={2}>LIVE</Badge>
+          )}
         </div>
       </div>
 
       {/* Driver rows */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {state.standingsV2.map((d, idx) => {
-          const id = d.driverId;
-          const isLeader = d.position === 1;
+      <div
+        style={{
+          position: "relative",
+          height: Math.max(0, standings.length * ROW_SLOT - ROW_GAP),
+          transition: `height ${SWAP_MS}ms ease`,
+        }}
+      >
+        {rows.map(({ d, idx }) => {
+          const id = d.id;
+          const move = moves[id];
+          const isLeader = d.rank === 1;
           const isFocused = false;
-          const { country, name } = rosterById[Number(id)];
+          const entry = rosterById[id];
+          const country = entry?.country ?? "";
+          const name = entry?.name ?? `#${id}`;
 
           const rightColor = isRace
             ? isLeader
@@ -137,14 +213,27 @@ export function STStandings({ state, isVisible }: Props) {
             : ST.inkDim;
 
           const bestLap = formatLap(
-            (state.drivers[Number(id)].telemetry?.bestLaptime ?? 0) / 1000,
+            (bestLaps.get(id) ?? drivers[id]?.telemetry?.bestLaptime ?? 0) /
+              1000,
           );
-          const rightText = mode === "race" ? d.gapText : bestLap;
+          // Race: interval to the car ahead (1 Hz snapshot); the leader keeps "Leader".
+          const rightText = isRace
+            ? isLeader
+              ? "Leader"
+              : formatGap(d.toAhead)
+            : bestLap;
           return (
             <div
               key={id}
               style={{
-                position: "relative",
+                position: "absolute",
+                left: 0,
+                right: 0,
+                top: 0,
+                transform: `translateY(${idx * ROW_SLOT}px)`,
+                transition: `transform ${SWAP_MS}ms cubic-bezier(0.65, 0, 0.35, 1)`,
+                // Gainer slides over the driver they passed
+                zIndex: move === "gain" ? 2 : move === "loss" ? 0 : 1,
                 background: ST.surface,
                 clipPath: clip.slashRight,
                 display: "grid",
@@ -152,7 +241,7 @@ export function STStandings({ state, isVisible }: Props) {
                 alignItems: "center",
                 gap: 10,
                 padding: "5px 24px 5px 0",
-                height: 38,
+                height: ROW_HEIGHT,
               }}
             >
               {/* Position number */}
@@ -196,9 +285,9 @@ export function STStandings({ state, isVisible }: Props) {
               <div
                 style={{
                   display: "flex",
-                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 8,
                   minWidth: 0,
-                  justifyContent: "center",
                 }}
               >
                 <div
@@ -215,6 +304,18 @@ export function STStandings({ state, isVisible }: Props) {
                 >
                   {name}
                 </div>
+                {finishedIds.has(id) && (
+                  <div
+                    title="Finished"
+                    style={{
+                      width: 16,
+                      height: 12,
+                      flexShrink: 0,
+                      background: chequered(3),
+                      clipPath: clip.smallSlash,
+                    }}
+                  />
+                )}
               </div>
 
               {/* Right column */}

@@ -27,6 +27,10 @@ export const stripes = `repeating-linear-gradient(
   transparent 6px 12px
 )`;
 
+/** Chequered-flag fill; `size` is one square in px. */
+export const chequered = (size = 8) =>
+  `repeating-conic-gradient(${ST.ink} 0 25%, ${ST.surfaceSolid} 0 50%) 0 0 / ${size * 2}px ${size * 2}px`;
+
 export const clip = {
   slashRight: "polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%)",
   slashLeft: "polygon(18px 0, 100% 0, 100% 100%, 0 100%, 0 18px)",

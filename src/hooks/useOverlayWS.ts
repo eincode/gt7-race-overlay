@@ -8,6 +8,7 @@ const DEFAULT_RACE_STATE: RaceState = {
   sectorCount: 0,
   lap: 0,
   totalLaps: 0,
+  phase: "racing",
   dayProgression: 0,
   order: [],
 };
