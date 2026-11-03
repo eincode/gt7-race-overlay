@@ -12,6 +12,13 @@ interface Props {
 export function STShowcase({ state, isVisible }: Props) {
   const { roster, raceState, drivers } = state;
   const { driverId } = state.overlayState.driverShowcase;
+
+  // Hooks before any early return, so the hook order is the same every render.
+  const [photos, setPhotos] = useState<Record<number, string>>(() => loadDriverPhotos());
+  useEffect(() => {
+    if (isVisible) setPhotos(loadDriverPhotos());
+  }, [isVisible]);
+
   if (driverId == null) return null;
 
   const rosterById = createRosterLookup(roster);
@@ -19,10 +26,6 @@ export function STShowcase({ state, isVisible }: Props) {
   const tel = drivers[driverId]?.telemetry;
   if (!d || !tel) return null;
 
-  const [photos, setPhotos] = useState<Record<number, string>>(() => loadDriverPhotos());
-  useEffect(() => {
-    if (isVisible) setPhotos(loadDriverPhotos());
-  }, [isVisible]);
   const photo = photos[driverId] ?? null;
 
   const cat = categoryInfo(tel.carCategory);

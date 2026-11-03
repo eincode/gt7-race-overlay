@@ -6,7 +6,7 @@ import {
   getDriverPosition,
   msToKmh,
 } from "../../../lib/utils";
-import type { OverlayData } from "../../../types";
+import type { DriverTelemetry, OverlayData } from "../../../types";
 import { Fuel } from "./driver-telemetry/Fuel";
 import { Gear } from "./driver-telemetry/Gear";
 import { Header } from "./driver-telemetry/Header";
@@ -33,6 +33,25 @@ export function STDriverTelemetry({ state, isVisible }: Props) {
   const name = rosterEntry?.name ?? `Driver #${driverId}`;
   const position = getDriverPosition(raceState.order, driverId);
 
+  return <Panel tel={tel} name={name} position={position} isVisible={isVisible} />;
+}
+
+/**
+ * The panel itself, split out so its hooks only ever run with telemetry in
+ * hand — STDriverTelemetry returns early while there is none, and hooks after
+ * an early return would change the hook order between renders.
+ */
+function Panel({
+  tel,
+  name,
+  position,
+  isVisible,
+}: {
+  tel: DriverTelemetry;
+  name: string;
+  position: number;
+  isVisible: boolean;
+}) {
   // ── Derived values ──────────────────────────────────────────────────────
 
   const speedKmh = msToKmh(tel.speed);
