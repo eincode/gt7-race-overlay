@@ -103,7 +103,16 @@ export function useOverlayWS() {
     return () => {
       unmountedRef.current = true;
       if (timerRef.current) clearTimeout(timerRef.current);
-      wsRef.current?.close();
+      const ws = wsRef.current;
+      if (ws?.readyState === WebSocket.CONNECTING) {
+        // Closing mid-handshake logs a browser warning (StrictMode remounts
+        // hit this in dev); close as soon as it opens instead.
+        ws.onopen = () => ws.close();
+        ws.onmessage = null;
+        ws.onclose = null;
+      } else {
+        ws?.close();
+      }
     };
   }, [connect]);
 
