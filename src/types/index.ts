@@ -52,6 +52,8 @@ export interface DriverTelemetry {
   RaceStartPosition: number;
   position: [number, number, number];
   steeringAngle?: number;
+  /** Steering wheel rotation in radians. Optional until every relay server sends it. */
+  wheelRotation?: number;
 }
 
 export interface DerivedData {

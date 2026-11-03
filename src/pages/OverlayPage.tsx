@@ -10,12 +10,13 @@
  * (POST /overlay/standings, /overlay/sector, /overlay/car-telemetry,
  * /overlay/driver-showcase) and broadcast through the WebSocket.
  */
-import { OverlayStencil } from "../components/overlays/stencil";
+import type { ComponentType } from "react";
+import { OverlayStencil, type OverlayProps } from "../components/overlays/stencil";
 import { useOverlayWS } from "../hooks/useOverlayWS";
 
-export function OverlayPage() {
+/** `Overlay` picks the visual direction; stencil unless a route says otherwise. */
+export function OverlayPage({ Overlay = OverlayStencil }: { Overlay?: ComponentType<OverlayProps> }) {
   const { state, connected } = useOverlayWS();
-  console.log("🚀 ~ OverlayPage ~ connected:", connected);
 
   return (
     <div
@@ -46,7 +47,7 @@ export function OverlayPage() {
         </div>
       )}
 
-      <OverlayStencil state={state} />
+      <Overlay state={state} />
     </div>
   );
 }
