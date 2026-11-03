@@ -9,6 +9,7 @@ export const PANEL_TITLES: Record<PanelKey, string> = {
   sector: "SECTOR COMPARE",
   carTelemetry: "CAR TELEMETRY",
   driverShowcase: "DRIVER SHOWCASE",
+  trackMap: "TRACK MAP",
 };
 
 const EMPTY_SLOT = (tag: string): SlotData => ({
@@ -85,6 +86,12 @@ export function buildPanels(
       title: PANEL_TITLES.driverShowcase,
       live: overlayState.driverShowcase.visible,
       slots: [slotFor(roster, photos, "DRV", overlayState.driverShowcase.driverId)],
+    },
+    {
+      key: "trackMap",
+      title: PANEL_TITLES.trackMap,
+      live: overlayState.trackMap.visible,
+      slots: [],
     },
   ];
 }

@@ -6,7 +6,8 @@ export type PanelKey =
   | "sector"
   | "carTelemetry"
   | "driverShowcase"
-  | "driverTelemetry";
+  | "driverTelemetry"
+  | "trackMap";
 
 export type PanelData = {
   key: PanelKey;

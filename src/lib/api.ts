@@ -159,6 +159,13 @@ export const api = {
     });
   },
 
+  setTrackMap(body: { visible?: boolean }): Promise<OkResponse> {
+    return fetchJSON<OkResponse>(`${baseUrl()}/overlay/track-map`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+
   wsUrl(): string {
     return baseUrl().replace(/^http/, "ws") + "/overlay";
   },

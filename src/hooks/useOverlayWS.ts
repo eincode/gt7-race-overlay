@@ -18,6 +18,7 @@ const DEFAULT_OVERLAY_STATE: OverlayState = {
   carTelemetry: { visible: false, driverIds: [] },
   driverShowcase: { visible: false, driverId: null },
   driverTelemetry: { visible: false, driverId: null },
+  trackMap: { visible: false },
 };
 
 const DEFAULT_STATE: OverlayData = {

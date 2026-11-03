@@ -32,7 +32,8 @@ export function useOverlayPanels(serverOverlayState: OverlayState) {
         prev.driverShowcase.visible === next.driverShowcase.visible &&
         prev.driverShowcase.driverId === next.driverShowcase.driverId &&
         prev.driverTelemetry.visible === next.driverTelemetry.visible &&
-        prev.driverTelemetry.driverId === next.driverTelemetry.driverId;
+        prev.driverTelemetry.driverId === next.driverTelemetry.driverId &&
+        prev.trackMap.visible === next.trackMap.visible;
       return equal ? prev : next;
     });
   }, [serverOverlayState]);
@@ -161,6 +162,17 @@ export function useOverlayPanels(serverOverlayState: OverlayState) {
     );
   }
 
+  // ── Track Map ────────────────────────────────────────────────────────────
+
+  function toggleTrackMap() {
+    const next = !panels.trackMap.visible;
+    void post(
+      "trackMap",
+      () => api.setTrackMap({ visible: next }),
+      (p) => ({ ...p, trackMap: { visible: next } }),
+    );
+  }
+
   return {
     panels,
     busy,
@@ -170,6 +182,7 @@ export function useOverlayPanels(serverOverlayState: OverlayState) {
     toggleCarTelemetry,
     toggleShowcase,
     toggleDriverTelemetry,
+    toggleTrackMap,
     setSectorDriver,
     setCarTelDriver,
     setShowcaseDriver,

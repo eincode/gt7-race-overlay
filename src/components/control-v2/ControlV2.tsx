@@ -36,6 +36,7 @@ export function ControlV2() {
     toggleCarTelemetry,
     toggleShowcase,
     toggleDriverTelemetry,
+    toggleTrackMap,
     setSectorDriver,
     setCarTelDriver,
     setShowcaseDriver,
@@ -117,6 +118,7 @@ export function ControlV2() {
         setDriverTelemetryDriver(id);
         break;
       case "standings":
+      case "trackMap":
         break;
     }
   };
@@ -137,6 +139,9 @@ export function ControlV2() {
         break;
       case "driverTelemetry":
         toggleDriverTelemetry();
+        break;
+      case "trackMap":
+        toggleTrackMap();
         break;
     }
   };

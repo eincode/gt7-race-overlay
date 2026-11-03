@@ -11,6 +11,7 @@ import { STCurrentSector } from "./STCurrentSector";
 import { STDriverTelemetry } from "./STDriverTelemetry";
 import { STShowcase } from "./STShowcase";
 import { STStandings } from "./STStandings";
+import { STTrackMap } from "./STTrackMap";
 
 export interface OverlayProps {
   state: OverlayData;
@@ -35,6 +36,7 @@ export function OverlayStencil({ state }: OverlayProps) {
         state={state}
         isVisible={overlayState.driverTelemetry.visible}
       />
+      <STTrackMap state={state} isVisible={overlayState.trackMap.visible} />
     </>
   );
 }

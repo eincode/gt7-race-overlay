@@ -25,6 +25,7 @@ export interface OverlayState {
   carTelemetry: { visible: boolean; driverIds: number[] }; // 0–2 IDs
   driverShowcase: { visible: boolean; driverId: number | null };
   driverTelemetry: { visible: boolean; driverId: number | null };
+  trackMap: { visible: boolean };
 }
 
 export interface DriverTelemetry {
