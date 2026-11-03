@@ -10,10 +10,14 @@ import type {
 type OkResponse = { ok: boolean };
 
 export function baseUrl(): string {
-  return (
-    (import.meta.env.VITE_SERVER_URL as string | undefined) ??
-    `http://${window.location.hostname}:3000`
-  );
+  const configured = import.meta.env.VITE_SERVER_URL as string | undefined;
+  if (configured) return configured;
+  // HTTPS (e.g. behind Cloudflare): go through the same-origin Vite proxy so
+  // the WebSocket upgrades to wss. Plain HTTP (localhost/LAN): hit the relay
+  // directly on port 3000.
+  return window.location.protocol === "https:"
+    ? `${window.location.origin}/relay`
+    : `http://${window.location.hostname}:3000`;
 }
 
 async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
