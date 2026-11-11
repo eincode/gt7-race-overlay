@@ -4,21 +4,32 @@ import type { SectorStatus } from "../../../types";
 export const ACCENT_RED = "#E24A42";
 export const SKY_BLUE = "#5CC8F5";
 
+/**
+ * Sized for a 2560×1440 canvas (OverlayPage at /overlay/modern). Values were
+ * scaled ×4/3 from the original 1080p layout and rounded to whole px.
+ */
+export const CANVAS_WIDTH = 2560;
+export const CANVAS_HEIGHT = 1440;
+/** Inset of every panel from the canvas edge. */
+const SCREEN_MARGIN = 53;
+/** Text size for anything that doesn't set its own. */
+const BASE_FONT_SIZE = 21;
+
 const LAP_BOX_OPACITY = 1;
-const RADIUS = 4;
-const BOX_HEIGHT = 32;
-const GAP_BEFORE_RACE_NAME = 8;
-const GAP_BETWEEN_HEADER_AND_LEADERBOARD = 8;
+const RADIUS = 5;
+const BOX_HEIGHT = 43;
+const GAP_BEFORE_RACE_NAME = 11;
+const GAP_BETWEEN_HEADER_AND_LEADERBOARD = 11;
 
 const DARK_FILL = "rgba(0,0,0,0.6)";
 const POSITION_CELL_FILL = "rgba(0,0,0,0.85)";
 
-const LEADERBOARD_WIDTH = 360;
-const LEADERBOARD_ROW_GAP = 2;
-const LEADERBOARD_GAP_WIDTH = 96;
-const POSITION_CELL_WIDTH = 48;
-const SLANT = 8;
-const SLASH_THICKNESS = 5;
+const LEADERBOARD_WIDTH = 480;
+const LEADERBOARD_ROW_GAP = 3;
+const LEADERBOARD_GAP_WIDTH = 128;
+const POSITION_CELL_WIDTH = 64;
+const SLANT = 11;
+const SLASH_THICKNESS = 7;
 
 export function withOpacity(hex: string, opacity: number) {
   const alphaHex = Math.round(opacity * 255).toString(16).padStart(2, "0");
@@ -31,12 +42,12 @@ const box: CSSProperties = {
   display: "flex",
   alignItems: "center",
   height: BOX_HEIGHT,
-  padding: "4px 16px",
+  padding: "5px 21px",
   color: "#fff",
 };
 
 const largeNumber: CSSProperties = {
-  fontSize: "1.125rem",
+  fontSize: 24,
   lineHeight: 1.75 / 1.125,
   fontWeight: 700,
 };
@@ -46,10 +57,11 @@ export const S = {
     width: "100%",
     height: "100%",
     boxSizing: "border-box",
-    padding: 40,
+    padding: SCREEN_MARGIN,
     position: "relative",
     background: "transparent",
     fontFamily: "Montserrat, system-ui, sans-serif",
+    fontSize: BASE_FONT_SIZE,
     fontWeight: 600,
   },
   panel: {
@@ -78,7 +90,7 @@ export const S = {
   },
   counter: {
     ...box,
-    gap: 8,
+    gap: 11,
     background: DARK_FILL,
     borderRadius: `0 ${RADIUS}px ${RADIUS}px 0`,
   },
@@ -120,8 +132,8 @@ export const leaderboardStyles = {
     display: "flex",
     alignItems: "center",
     marginLeft: -SLANT,
-    paddingLeft: SLANT + 10,
-    paddingRight: 14,
+    paddingLeft: SLANT + 13,
+    paddingRight: 19,
     background: DARK_FILL,
     clipPath: `polygon(${SLANT}px 0, 100% 0, 100% 100%, 0 100%)`,
   },
@@ -139,7 +151,7 @@ export const leaderboardStyles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "flex-end",
-    paddingRight: 12,
+    paddingRight: 16,
     background: DARK_FILL,
     borderRadius: RADIUS,
     fontVariantNumeric: "tabular-nums",
@@ -170,16 +182,16 @@ export function positionSlashStyle(isLeader: boolean): CSSProperties {
   };
 }
 
-const TELEMETRY_WIDTH = 380;
-const PEDAL_SEGMENT_HEIGHT = 6;
-const PEDAL_SEGMENT_GAP = 2;
-export const GEAR_CELL_WIDTH = 24;
+const TELEMETRY_WIDTH = 507;
+const PEDAL_SEGMENT_HEIGHT = 8;
+const PEDAL_SEGMENT_GAP = 3;
+export const GEAR_CELL_WIDTH = 32;
 
 export const telemetryStyles = {
   panel: {
     position: "absolute",
-    bottom: 40,
-    right: 40,
+    bottom: SCREEN_MARGIN,
+    right: SCREEN_MARGIN,
     width: TELEMETRY_WIDTH,
     display: "flex",
     flexDirection: "column",
@@ -199,14 +211,14 @@ export const telemetryStyles = {
   },
   nameBox: {
     ...box,
-    gap: 10,
+    gap: 13,
     background: DARK_FILL,
     borderRadius: `0 ${RADIUS}px ${RADIUS}px 0`,
   },
   flag: {
-    width: 24,
-    height: 16,
-    borderRadius: 2,
+    width: 32,
+    height: 21,
+    borderRadius: 3,
     objectFit: "cover",
   },
   name: {
@@ -220,7 +232,7 @@ export const telemetryStyles = {
   body: {
     display: "flex",
     alignItems: "center",
-    padding: "16px 20px",
+    padding: "21px 27px",
     background: DARK_FILL,
     borderRadius: RADIUS,
     color: "#fff",
@@ -228,12 +240,12 @@ export const telemetryStyles = {
   inputs: {
     display: "flex",
     alignItems: "center",
-    gap: 14,
+    gap: 19,
   },
   divider: {
     alignSelf: "stretch",
     width: 1,
-    margin: "0 20px",
+    margin: "0 27px",
     background: "rgba(255,255,255,0.3)",
   },
   dash: {
@@ -241,31 +253,31 @@ export const telemetryStyles = {
     minWidth: 0,
     display: "flex",
     flexDirection: "column",
-    gap: 6,
+    gap: 8,
   },
   pedal: {
     display: "flex",
     flexDirection: "column-reverse",
     gap: PEDAL_SEGMENT_GAP,
-    width: 14,
+    width: 19,
   },
   pedalSegment: {
     height: PEDAL_SEGMENT_HEIGHT,
     borderRadius: 1,
   },
   wheel: {
-    width: 96,
-    height: 96,
+    width: 128,
+    height: 128,
     display: "block",
   },
   rpmRow: {
     display: "flex",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
   },
   rpmTrack: {
     flex: 1,
-    height: 8,
+    height: 11,
     borderRadius: RADIUS,
     background: "rgba(255,255,255,0.15)",
     overflow: "hidden",
@@ -276,9 +288,9 @@ export const telemetryStyles = {
     borderRadius: RADIUS,
   },
   shiftLight: {
-    width: 14,
-    height: 8,
-    borderRadius: 2,
+    width: 19,
+    height: 11,
+    borderRadius: 3,
   },
   gearWindow: {
     overflow: "hidden",
@@ -289,26 +301,26 @@ export const telemetryStyles = {
   gearStrip: {
     display: "flex",
     alignItems: "center",
-    height: 36,
+    height: 48,
     transition: "transform 180ms ease-out",
   },
   gear: {
     flexShrink: 0,
     width: GEAR_CELL_WIDTH,
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 600,
     color: "rgba(255,255,255,0.55)",
   },
   speed: {
-    fontSize: 56,
+    fontSize: 75,
     fontWeight: 700,
     lineHeight: 1,
     textAlign: "center",
     fontVariantNumeric: "tabular-nums",
   },
   speedUnit: {
-    fontSize: 13,
+    fontSize: 17,
     textAlign: "center",
     color: "rgba(255,255,255,0.8)",
   },
@@ -322,23 +334,23 @@ export function pedalSegmentStyle(lit: boolean, color: string): CSSProperties {
 }
 
 export function currentGearStyle(): CSSProperties {
-  return { ...telemetryStyles.gear, fontSize: 30, fontWeight: 700, color: SKY_BLUE };
+  return { ...telemetryStyles.gear, fontSize: 40, fontWeight: 700, color: SKY_BLUE };
 }
 
 export function shiftLightStyle(lit: boolean): CSSProperties {
   return {
     ...telemetryStyles.shiftLight,
     background: lit ? ACCENT_RED : withOpacity(ACCENT_RED, 0.3),
-    boxShadow: lit ? `0 0 8px ${ACCENT_RED}` : "none",
+    boxShadow: lit ? `0 0 11px ${ACCENT_RED}` : "none",
   };
 }
 
 // ── Sector compare ──────────────────────────────────────────────────────────
 
-const SECTOR_PANEL_WIDTH = 880;
-const SECTOR_CENTRE_WIDTH = 120;
-const SECTOR_BODY_HEIGHT = 96;
-const SECTOR_GAP = 2;
+const SECTOR_PANEL_WIDTH = 1173;
+const SECTOR_CENTRE_WIDTH = 160;
+const SECTOR_BODY_HEIGHT = 128;
+const SECTOR_GAP = 3;
 
 export const FASTEST_PURPLE = "#A970FF";
 const PERSONAL_BEST_GREEN = "#4CD964";
@@ -355,7 +367,7 @@ const DIM_TEXT = "rgba(255,255,255,0.55)";
 export const sectorStyles = {
   panel: {
     position: "absolute",
-    bottom: 40,
+    bottom: SCREEN_MARGIN,
     // Centred with auto margins: motion owns `transform` on its elements.
     left: 0,
     right: 0,
@@ -381,7 +393,7 @@ export const sectorStyles = {
     justifyContent: "center",
     flexShrink: 0,
     background: accentFill,
-    fontSize: 13,
+    fontSize: 17,
     letterSpacing: "0.12em",
   },
   centreBody: {
@@ -394,40 +406,40 @@ export const sectorStyles = {
     background: DARK_FILL,
   },
   sectorNumber: {
-    fontSize: 48,
+    fontSize: 64,
     fontWeight: 700,
     lineHeight: 1,
   },
   sectorOf: {
-    fontSize: 12,
+    fontSize: 16,
     color: DIM_TEXT,
-    marginTop: 2,
+    marginTop: 3,
   },
   headerSlot: {
     overflow: "hidden",
   },
   header: {
     ...box,
-    gap: 10,
+    gap: 13,
     background: DARK_FILL,
     borderRadius: RADIUS,
   },
   headerPosition: {
     ...largeNumber,
-    minWidth: 20,
+    minWidth: 27,
     textAlign: "center",
   },
   headerDivider: {
     width: 1,
-    height: 18,
+    height: 24,
     flexShrink: 0,
     background: "rgba(255,255,255,0.3)",
   },
   category: {
     flexShrink: 0,
-    padding: "1px 6px",
-    borderRadius: 2,
-    fontSize: 11,
+    padding: "1px 8px",
+    borderRadius: 3,
+    fontSize: 15,
     fontWeight: 700,
     letterSpacing: "0.04em",
   },
@@ -442,8 +454,8 @@ export const sectorStyles = {
   body: {
     display: "flex",
     alignItems: "center",
-    gap: 16,
-    padding: "12px 20px",
+    gap: 21,
+    padding: "16px 27px",
     background: DARK_FILL,
     borderRadius: RADIUS,
   },
@@ -452,10 +464,10 @@ export const sectorStyles = {
     minWidth: 0,
     display: "flex",
     flexDirection: "column",
-    gap: 8,
+    gap: 11,
   },
   carName: {
-    fontSize: 13,
+    fontSize: 17,
     color: "rgba(255,255,255,0.8)",
     whiteSpace: "nowrap",
     overflow: "hidden",
@@ -463,18 +475,18 @@ export const sectorStyles = {
   },
   chips: {
     display: "flex",
-    gap: 3,
+    gap: 4,
   },
   chip: {
-    width: 34,
-    padding: "2px 0",
-    borderRadius: 2,
-    fontSize: 10,
+    width: 45,
+    padding: "3px 0",
+    borderRadius: 3,
+    fontSize: 13,
     fontWeight: 700,
     textAlign: "center",
   },
   best: {
-    fontSize: 12,
+    fontSize: 16,
     color: DIM_TEXT,
     fontVariantNumeric: "tabular-nums",
   },
@@ -482,16 +494,16 @@ export const sectorStyles = {
     flexShrink: 0,
     display: "flex",
     flexDirection: "column",
-    gap: 2,
+    gap: 3,
   },
   time: {
-    fontSize: 38,
+    fontSize: 51,
     fontWeight: 700,
     lineHeight: 1,
     fontVariantNumeric: "tabular-nums",
   },
   delta: {
-    fontSize: 20,
+    fontSize: 27,
     fontWeight: 700,
     lineHeight: 1,
     fontVariantNumeric: "tabular-nums",
@@ -504,7 +516,7 @@ export function sectorChipStyle(status: SectorStatus, compared: boolean): CSSPro
     ...sectorStyles.chip,
     background: SECTOR_STATUS_FILL[status],
     color: status === "neutral" ? DIM_TEXT : "#fff",
-    boxShadow: compared ? "inset 0 0 0 1.5px #fff" : "none",
+    boxShadow: compared ? "inset 0 0 0 2px #fff" : "none",
   };
 }
 
@@ -522,18 +534,18 @@ export function bestLapStyle(fastest: boolean): CSSProperties {
 
 // ── Driver showcase ─────────────────────────────────────────────────────────
 
-const SHOWCASE_WIDTH = 460;
-const SHOWCASE_NAME_HEIGHT = 44;
-const SHOWCASE_SUBTITLE_HEIGHT = 28;
-const SHOWCASE_POSITION_WIDTH = 56;
-const SHOWCASE_PHOTO_SIZE = 220;
+const SHOWCASE_WIDTH = 613;
+const SHOWCASE_NAME_HEIGHT = 59;
+const SHOWCASE_SUBTITLE_HEIGHT = 37;
+const SHOWCASE_POSITION_WIDTH = 75;
+const SHOWCASE_PHOTO_SIZE = 293;
 const SHOWCASE_HEIGHT =
   SHOWCASE_PHOTO_SIZE + SHOWCASE_NAME_HEIGHT + SHOWCASE_SUBTITLE_HEIGHT + 2 * LEADERBOARD_ROW_GAP;
 
 export const showcaseStyles = {
   panel: {
     position: "absolute",
-    right: 40,
+    right: SCREEN_MARGIN,
     // Vertically centred with auto margins (motion owns `transform`), which needs a fixed height.
     top: 0,
     bottom: 0,
@@ -566,7 +578,7 @@ export const showcaseStyles = {
     justifyContent: "center",
     background: accentFill,
     borderRadius: `${RADIUS}px 0 0 ${RADIUS}px`,
-    fontSize: 28,
+    fontSize: 37,
     fontWeight: 700,
   },
   nameSlot: {
@@ -578,14 +590,14 @@ export const showcaseStyles = {
     height: "100%",
     display: "flex",
     alignItems: "center",
-    gap: 12,
-    padding: "0 14px 0 18px",
+    gap: 16,
+    padding: "0 19px 0 24px",
     background: DARK_FILL,
     borderRadius: `0 ${RADIUS}px ${RADIUS}px 0`,
   },
   name: {
     flex: 1,
-    fontSize: 22,
+    fontSize: 29,
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: "0.02em",
@@ -594,10 +606,10 @@ export const showcaseStyles = {
     textOverflow: "ellipsis",
   },
   flag: {
-    width: 36,
-    height: 24,
+    width: 48,
+    height: 32,
     flexShrink: 0,
-    borderRadius: 2,
+    borderRadius: 3,
     objectFit: "cover",
   },
   subtitleRow: {
@@ -605,7 +617,7 @@ export const showcaseStyles = {
     height: SHOWCASE_SUBTITLE_HEIGHT,
     borderRadius: RADIUS,
     overflow: "hidden",
-    fontSize: 13,
+    fontSize: 17,
   },
   psnId: {
     ...box,
@@ -613,7 +625,7 @@ export const showcaseStyles = {
     flexShrink: 0,
     minWidth: SHOWCASE_POSITION_WIDTH,
     justifyContent: "center",
-    paddingRight: 16 + SLANT,
+    paddingRight: 21 + SLANT,
     background: POSITION_CELL_FILL,
     clipPath: `polygon(0 0, 100% 0, calc(100% - ${SLANT}px) 100%, 0 100%)`,
   },
@@ -623,7 +635,7 @@ export const showcaseStyles = {
     flex: 1,
     minWidth: 0,
     marginLeft: -SLANT,
-    paddingLeft: SLANT + 12,
+    paddingLeft: SLANT + 16,
     background: DARK_FILL,
     clipPath: `polygon(${SLANT}px 0, 100% 0, 100% 100%, 0 100%)`,
   },
@@ -636,8 +648,8 @@ export const showcaseStyles = {
 
 // ── Track map ───────────────────────────────────────────────────────────────
 
-export const TRACK_MAP_WIDTH = 460;
-export const TRACK_MAP_HEIGHT = 320;
+export const TRACK_MAP_WIDTH = 613;
+export const TRACK_MAP_HEIGHT = 427;
 
 /** Map colours: no panel behind it, so the road carries its own dark fill to read over the game. */
 export const trackMapColors = {
@@ -657,8 +669,8 @@ export const trackMapColors = {
 export const trackMapStyles = {
   map: {
     position: "absolute",
-    top: 40,
-    right: 40,
+    top: SCREEN_MARGIN,
+    right: SCREEN_MARGIN,
     width: TRACK_MAP_WIDTH,
     height: TRACK_MAP_HEIGHT,
   },
@@ -674,16 +686,16 @@ export const trackMapStyles = {
 
 // ── Battle (car telemetry toggle) ───────────────────────────────────────────
 
-const BATTLE_WIDTH = 760;
-const BATTLE_ROW_HEIGHT = 40;
-const BATTLE_LABEL_HEIGHT = 26;
-const BATTLE_POSITION_WIDTH = 72;
-const BATTLE_GAP_WIDTH = 128;
+const BATTLE_WIDTH = 1013;
+const BATTLE_ROW_HEIGHT = 53;
+const BATTLE_LABEL_HEIGHT = 35;
+const BATTLE_POSITION_WIDTH = 96;
+const BATTLE_GAP_WIDTH = 171;
 
 export const battleStyles = {
   panel: {
     position: "absolute",
-    bottom: 40,
+    bottom: SCREEN_MARGIN,
     // Centred with auto margins: motion owns `transform` on its elements.
     left: 0,
     right: 0,
@@ -708,12 +720,12 @@ export const battleStyles = {
     alignItems: "baseline",
   },
   positionNumber: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 700,
     lineHeight: 1,
   },
   positionSuffix: {
-    fontSize: 13,
+    fontSize: 17,
     fontWeight: 700,
     marginLeft: 1,
   },
@@ -725,20 +737,20 @@ export const battleStyles = {
     height: "100%",
     display: "flex",
     alignItems: "center",
-    gap: 10,
-    padding: "0 18px",
+    gap: 13,
+    padding: "0 24px",
     background: DARK_FILL,
     borderRadius: RADIUS,
   },
   flag: {
-    width: 27,
-    height: 18,
+    width: 36,
+    height: 24,
     flexShrink: 0,
-    borderRadius: 2,
+    borderRadius: 3,
     objectFit: "cover",
   },
   name: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: "0.02em",
@@ -755,7 +767,7 @@ export const battleStyles = {
     background: POSITION_CELL_FILL,
     borderRadius: RADIUS,
     color: ACCENT_RED,
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 700,
     fontVariantNumeric: "tabular-nums",
   },
@@ -768,7 +780,7 @@ export const battleStyles = {
     background: "rgba(255,255,255,0.9)",
     borderRadius: RADIUS,
     color: "#111",
-    fontSize: 13,
+    fontSize: 17,
     fontWeight: 700,
     letterSpacing: "0.08em",
     textTransform: "uppercase",

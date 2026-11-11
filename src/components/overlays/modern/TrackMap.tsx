@@ -8,17 +8,26 @@ import type { OverlayData } from "../../../types";
 import { boxWipeDown, leaderboardDuration, leaderboardRowWipe, type RowPosition } from "./animations";
 import {
   ACCENT_RED,
-  TRACK_MAP_HEIGHT as MAP_H,
-  TRACK_MAP_WIDTH as MAP_W,
+  TRACK_MAP_HEIGHT,
+  TRACK_MAP_WIDTH,
   trackMapColors as K,
   trackMapStyles as M,
 } from "./styles";
+
+/**
+ * Drawing space, in 1080p px. The map is drawn at this size and the SVG scales
+ * it up to TRACK_MAP_WIDTH × TRACK_MAP_HEIGHT on the 1440p canvas, because
+ * lib/trackMap's leader lengths and mark sizes (shared with stencil) are in 1080p px.
+ */
+const MAP_W = 460;
+const MAP_H = 320;
 
 /** Room around the road for the tags, in px. */
 const PADDING = 50;
 /** Upper bound on zoom, in px per metre. */
 const MAX_SCALE = 1;
 const MIN_ROAD_PX = 3;
+const VIEW_BOX = `0 0 ${MAP_W} ${MAP_H}`;
 
 const DOT_R = 6;
 const TAG_H = 20;
@@ -92,7 +101,7 @@ export function TrackMap({ state, standings }: Props) {
       {overlayState.trackMap.visible && paths && (
         <motion.div key={raceState.trackId} initial="hidden" animate="visible" exit="exit" style={M.map}>
           <motion.div custom={TRACK_EXIT_DELAY} variants={boxWipeDown} style={M.layer}>
-            <svg width={MAP_W} height={MAP_H} style={M.svg}>
+            <svg width={TRACK_MAP_WIDTH} height={TRACK_MAP_HEIGHT} viewBox={VIEW_BOX} style={M.svg}>
               <g opacity={K.roadOpacity}>
                 <path d={paths.road} fill={K.road} stroke={K.road} strokeWidth={0.75} strokeLinejoin="round" />
                 <path d={paths.center} fill="none" stroke={K.road} strokeWidth={MIN_ROAD_PX} strokeLinejoin="round" />
@@ -105,7 +114,7 @@ export function TrackMap({ state, standings }: Props) {
           </motion.div>
 
           <motion.div custom={CARS_POSITION} variants={leaderboardRowWipe} style={M.layer}>
-            <svg width={MAP_W} height={MAP_H} style={M.svg}>
+            <svg width={TRACK_MAP_WIDTH} height={TRACK_MAP_HEIGHT} viewBox={VIEW_BOX} style={M.svg}>
               {/* Lines and tags first, dots last, so no tag ever hides a car. */}
               {tags.map((t) => (
                 <Tag key={`tag-${t.id}`} {...t} />
