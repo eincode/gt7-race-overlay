@@ -190,7 +190,8 @@ export const GEAR_CELL_WIDTH = 32;
 export const telemetryStyles = {
   panel: {
     position: "absolute",
-    bottom: SCREEN_MARGIN,
+    // Raised well clear of the bottom edge: the bottom-right corner is left for a sponsor slideshow added in OBS.
+    bottom: 320,
     right: SCREEN_MARGIN,
     width: TELEMETRY_WIDTH,
     display: "flex",
@@ -691,6 +692,7 @@ const BATTLE_ROW_HEIGHT = 53;
 const BATTLE_LABEL_HEIGHT = 35;
 const BATTLE_POSITION_WIDTH = 96;
 const BATTLE_GAP_WIDTH = 171;
+const BATTLE_LABEL_FILL = "rgba(64,64,70,0.9)";
 
 export const battleStyles = {
   panel: {
@@ -777,9 +779,10 @@ export const battleStyles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "rgba(255,255,255,0.9)",
+    // Grey, a step lighter than the black boxes above, so the label reads as its own bar over any footage.
+    background: BATTLE_LABEL_FILL,
     borderRadius: RADIUS,
-    color: "#111",
+    color: "#fff",
     fontSize: 17,
     fontWeight: 700,
     letterSpacing: "0.08em",
