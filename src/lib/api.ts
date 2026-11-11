@@ -4,6 +4,7 @@ import type {
   RosterEntry,
   SessionMode,
   SessionResponse,
+  StandingsSource,
   TrackMapData,
   TrackVenue,
 } from "../types";
@@ -112,7 +113,10 @@ export const api = {
 
   // ── Overlay panel controls ────────────────────────────────────────────────
 
-  setStandings(body: { visible?: boolean }): Promise<OkResponse> {
+  setStandings(body: {
+    visible?: boolean;
+    source?: StandingsSource;
+  }): Promise<OkResponse> {
     return fetchJSON<OkResponse>(`${baseUrl()}/overlay/standings`, {
       method: "POST",
       body: JSON.stringify(body),

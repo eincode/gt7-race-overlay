@@ -19,8 +19,16 @@ export interface Session {
 
 // ── Overlay panel visibility (server-driven) ────────────────────────────────
 
+/**
+ * Where the standings order comes from: "game" = standingsV2 positions
+ * (the game's own reported positions), "inferred" = raceState.order.
+ */
+export type StandingsSource = "game" | "inferred";
+export const DEFAULT_STANDINGS_SOURCE: StandingsSource = "game";
+
 export interface OverlayState {
-  standings: { visible: boolean };
+  /** `source` is optional until every relay server sends it; treat missing as DEFAULT_STANDINGS_SOURCE. */
+  standings: { visible: boolean; source?: StandingsSource };
   sector: { visible: boolean; driverIds: number[] }; // 0–2 IDs
   carTelemetry: { visible: boolean; driverIds: number[] }; // 0–2 IDs
   driverShowcase: { visible: boolean; driverId: number | null };

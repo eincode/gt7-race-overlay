@@ -1,7 +1,12 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useSessionBestLaps, useStandingsSnapshot } from "../../../hooks/useStandings";
+import {
+  UNKNOWN_DRIVER_NAME,
+  UNKNOWN_GAP_TEXT,
+  useSessionBestLaps,
+  useStandingsSnapshot,
+} from "../../../hooks/useStandings";
 import { createRosterLookup } from "../../../lib/utils";
-import type { OverlayData } from "../../../types";
+import { DEFAULT_STANDINGS_SOURCE, type OverlayData } from "../../../types";
 import { formatLap } from "../stencil/qualifying/result";
 import {
   lapBoxWipe,
@@ -32,11 +37,17 @@ export function Modern({ state }: { state: OverlayData }) {
 
   // Order and gaps refresh together once a second, same as the stencil standings.
   // Shared with the telemetry panel so its position changes with the leaderboard.
-  const standings = useStandingsSnapshot(order, drivers, state.standingsV2);
+  const standings = useStandingsSnapshot(
+    order,
+    drivers,
+    state.standingsV2,
+    state.overlayState.standings.source ?? DEFAULT_STANDINGS_SOURCE,
+  );
   const bestLaps = useSessionBestLaps(drivers, `${state.session?.id}:${mode}`);
   const rosterById = createRosterLookup(roster);
 
-  const entries: LeaderboardEntry[] = standings.map(({ id, rank, gapText }) => {
+  const entries: LeaderboardEntry[] = standings.map(({ id, rank, gapText, unknown }) => {
+    if (unknown) return { id, name: UNKNOWN_DRIVER_NAME, detail: UNKNOWN_GAP_TEXT };
     const bestLapMs = bestLaps.get(id) ?? drivers[id]?.telemetry?.bestLaptime ?? 0;
     return {
       id,

@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   formatGap,
+  UNKNOWN_DRIVER_NAME,
+  UNKNOWN_GAP_TEXT,
   useSessionBestLaps,
   useStandingsSnapshot,
 } from "../../../hooks/useStandings";
 import { createRosterLookup, fmtTrackName } from "../../../lib/utils";
-import type { OverlayData } from "../../../types";
+import { DEFAULT_STANDINGS_SOURCE, type OverlayData } from "../../../types";
 import { Badge } from "./Badge";
 import { formatLap } from "./qualifying/result";
 import { chequered, clip, FONT, panelMotion, ST, stripes } from "./tokens";
@@ -36,7 +38,12 @@ export function STStandings({ state, isVisible }: Props) {
   // so they always agree and a position battle slides at most once a second.
   // Per-frame data that isn't order (best lap, finished marker, names) stays
   // live, looked up by id.
-  const standings = useStandingsSnapshot(order, drivers, state.standingsV2);
+  const standings = useStandingsSnapshot(
+    order,
+    drivers,
+    state.standingsV2,
+    state.overlayState.standings.source ?? DEFAULT_STANDINGS_SOURCE,
+  );
   const bestLaps = useSessionBestLaps(drivers,`${state.session?.id}:${mode}`);
   // Chequered-flag marker per driver, still taken from the server's standings.
   const finishedIds = new Set(
@@ -202,9 +209,9 @@ export function STStandings({ state, isVisible }: Props) {
           const move = moves[id];
           const isLeader = d.rank === 1;
           const isFocused = false;
-          const entry = rosterById[id];
+          const entry = d.unknown ? undefined : rosterById[id];
           const country = entry?.country ?? "";
-          const name = entry?.name ?? `#${id}`;
+          const name = d.unknown ? UNKNOWN_DRIVER_NAME : (entry?.name ?? `#${id}`);
 
           const rightColor = isRace
             ? isLeader
@@ -217,7 +224,9 @@ export function STStandings({ state, isVisible }: Props) {
               1000,
           );
           // Race: interval to the car ahead (1 Hz snapshot); the leader keeps "Leader".
-          const rightText = isRace
+          const rightText = d.unknown
+            ? UNKNOWN_GAP_TEXT
+            : isRace
             ? isLeader
               ? "Leader"
               : formatGap(d.toAhead)

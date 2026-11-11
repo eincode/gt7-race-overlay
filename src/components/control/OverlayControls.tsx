@@ -193,7 +193,7 @@ export function OverlayControls({
     void post(
       "standings",
       () => api.setStandings({ visible: next }),
-      (p) => ({ ...p, standings: { visible: next } }),
+      (p) => ({ ...p, standings: { ...p.standings, visible: next } }),
     );
   }
 

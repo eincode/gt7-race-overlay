@@ -74,7 +74,7 @@ Base URL from `VITE_SERVER_URL`, fallback `http://localhost:3000`.
 | `deleteSession()` | `DELETE /session` | Delete session, clears localStorage photos |
 | `getDrivers()` | `GET /drivers` | Driver list (polled every 3s by DriversTable) |
 | `setMode(mode)` | `POST /session/mode` | Change mode (Race/Qualifying/Practice) |
-| `setStandings({visible?})` | `POST /overlay/standings` | Toggle standings (no driver selection) |
+| `setStandings({visible?, source?})` | `POST /overlay/standings` | Toggle standings; `source` `"game"` (default, orders by `standingsV2.position`) or `"inferred"` (orders by `raceState.order`) |
 | `setSector({visible?, driverIds?})` | `POST /overlay/sector` | Toggle sector compare (0–2 drivers) |
 | `setCarTelemetry({visible?, driverIds?})` | `POST /overlay/car-telemetry` | Toggle car telemetry (0–2 drivers) |
 | `setDriverShowcase({visible?, driverId?})` | `POST /overlay/driver-showcase` | Toggle showcase (0–1 driver) |

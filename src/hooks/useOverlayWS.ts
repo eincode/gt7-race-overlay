@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
-import type { OverlayData, OverlayState, RaceState, WSMessage } from "../types";
+import { DEFAULT_STANDINGS_SOURCE, type OverlayData, type OverlayState, type RaceState, type WSMessage } from "../types";
 
 const DEFAULT_RACE_STATE: RaceState = {
   mode: "practice",
@@ -14,7 +14,7 @@ const DEFAULT_RACE_STATE: RaceState = {
 };
 
 const DEFAULT_OVERLAY_STATE: OverlayState = {
-  standings: { visible: false },
+  standings: { visible: false, source: DEFAULT_STANDINGS_SOURCE },
   sector: { visible: false, driverIds: [] },
   carTelemetry: { visible: false, driverIds: [] },
   driverShowcase: { visible: false, driverId: null },
