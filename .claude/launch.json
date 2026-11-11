@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "--port", "5173"],
       "port": 5173
+    },
+    {
+      "name": "relay-mock",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["--cwd", "../gt7-telemetry-server", "mock"],
+      "port": 3000
     }
   ]
 }
