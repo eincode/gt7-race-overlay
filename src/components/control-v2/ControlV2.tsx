@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../../lib/api";
 import { loadDriverPhotos, saveDriverPhotos } from "../../lib/utils";
 import { useOverlayWS } from "../../hooks/useOverlayWS";
-import type { RosterEntry, Session } from "../../types";
+import { DEFAULT_STANDINGS_SOURCE, type RosterEntry, type Session } from "../../types";
 import { DriverPicker } from "./DriverPicker";
 import { DriversPage } from "./DriversPage";
 import { Header } from "./Header";
@@ -32,6 +32,7 @@ export function ControlV2() {
     busy,
     error,
     toggleStandings,
+    setStandingsSource,
     toggleSector,
     toggleCarTelemetry,
     toggleShowcase,
@@ -175,8 +176,10 @@ export function ControlV2() {
                 panels={buildPanels(panels, session.roster, photos)}
                 busy={busy}
                 error={error}
+                standingsSource={panels.standings.source ?? DEFAULT_STANDINGS_SOURCE}
                 onSlotClick={(panelKey, tag) => setPicker({ panelKey, tag })}
                 onToggle={togglePanel}
+                onStandingsSourceChange={setStandingsSource}
               />
             )}
 

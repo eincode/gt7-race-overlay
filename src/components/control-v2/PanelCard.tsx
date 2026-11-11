@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { SlotData } from "./SlotCard";
 import { SlotCard } from "./SlotCard";
 
@@ -21,11 +22,14 @@ export function PanelCard({
   busy,
   onSlotClick,
   onToggle,
+  children,
 }: {
   panel: PanelData;
   busy?: boolean;
   onSlotClick: (panelKey: PanelKey, tag: string) => void;
   onToggle: (panelKey: PanelKey) => void;
+  /** Extra panel settings, shown under the header. */
+  children?: ReactNode;
 }) {
   return (
     <section className="overflow-hidden rounded-[18px] border border-white/9 bg-[#1c1c1f]">
@@ -56,6 +60,7 @@ export function PanelCard({
           )}
         </button>
       </div>
+      {children && <div className="px-5 pb-5">{children}</div>}
       {panel.slots.length > 0 && (
         <div className="flex flex-col gap-2.5 px-5 pb-5">
           {panel.slots.map((slot) => (

@@ -1,4 +1,4 @@
-import type { OverlayState, RosterEntry } from "../../types";
+import type { OverlayState, RosterEntry, StandingsSource } from "../../types";
 import type { PanelData, PanelKey } from "./PanelCard";
 import { PanelCard } from "./PanelCard";
 import type { SlotData } from "./SlotCard";
@@ -96,18 +96,66 @@ export function buildPanels(
   ];
 }
 
+const STANDINGS_SOURCES: { value: StandingsSource; label: string }[] = [
+  { value: "game", label: "Game reported standings" },
+  { value: "inferred", label: "Inferred standings" },
+];
+
+function StandingsSourceToggle({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: StandingsSource;
+  disabled?: boolean;
+  onChange: (source: StandingsSource) => void;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Standings source"
+      className="grid grid-cols-2 gap-1 rounded-xl bg-[#141416] p-1"
+    >
+      {STANDINGS_SOURCES.map((option) => {
+        const selected = option.value === value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            disabled={disabled}
+            onClick={() => !selected && onChange(option.value)}
+            className={`h-11 rounded-lg px-3 font-jetbrains text-xs font-bold tracking-[0.06em] transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              selected
+                ? "bg-[#2b2b30] text-zinc-100 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]"
+                : "text-[#8b8b93] hover:text-zinc-300"
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function OverlaysPage({
   panels,
   busy,
   error,
+  standingsSource,
   onSlotClick,
   onToggle,
+  onStandingsSourceChange,
 }: {
   panels: PanelData[];
   busy: PanelKey | null;
   error: string | null;
+  standingsSource: StandingsSource;
   onSlotClick: (panelKey: PanelKey, tag: string) => void;
   onToggle: (panelKey: PanelKey) => void;
+  onStandingsSourceChange: (source: StandingsSource) => void;
 }) {
   return (
     <main className="grid flex-1 content-start gap-4 p-6 pb-10 grid-cols-[repeat(auto-fit,minmax(400px,1fr))]">
@@ -123,7 +171,15 @@ export function OverlaysPage({
           busy={busy === panel.key}
           onSlotClick={(p, tag) => onSlotClick(p, tag)}
           onToggle={onToggle}
-        />
+        >
+          {panel.key === "standings" && (
+            <StandingsSourceToggle
+              value={standingsSource}
+              disabled={busy === "standings"}
+              onChange={onStandingsSourceChange}
+            />
+          )}
+        </PanelCard>
       ))}
     </main>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import type { OverlayState } from "../../types";
+import type { OverlayState, StandingsSource } from "../../types";
 import type { PanelKey } from "./PanelCard";
 
 /**
@@ -21,6 +21,7 @@ export function useOverlayPanels(serverOverlayState: OverlayState) {
       const next = serverOverlayState;
       const equal =
         prev.standings.visible === next.standings.visible &&
+        prev.standings.source === next.standings.source &&
         prev.sector.visible === next.sector.visible &&
         prev.sector.driverIds.length === next.sector.driverIds.length &&
         prev.sector.driverIds.every((id, i) => id === next.sector.driverIds[i]) &&
@@ -62,7 +63,15 @@ export function useOverlayPanels(serverOverlayState: OverlayState) {
     void post(
       "standings",
       () => api.setStandings({ visible: next }),
-      (p) => ({ ...p, standings: { visible: next } }),
+      (p) => ({ ...p, standings: { ...p.standings, visible: next } }),
+    );
+  }
+
+  function setStandingsSource(source: StandingsSource) {
+    void post(
+      "standings",
+      () => api.setStandings({ source }),
+      (p) => ({ ...p, standings: { ...p.standings, source } }),
     );
   }
 
@@ -178,6 +187,7 @@ export function useOverlayPanels(serverOverlayState: OverlayState) {
     busy,
     error,
     toggleStandings,
+    setStandingsSource,
     toggleSector,
     toggleCarTelemetry,
     toggleShowcase,
